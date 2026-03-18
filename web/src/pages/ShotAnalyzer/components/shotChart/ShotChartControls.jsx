@@ -83,7 +83,10 @@ export function ShotChartControls({
                 }`}
               >
                 {LEGEND_BLOCK_LABELS.has(label) ? (
-                  <span className='h-2.5 w-3 rounded-[2px]' style={{ backgroundColor: swatchColor }} />
+                  <span
+                    className='h-2.5 w-3 rounded-[2px]'
+                    style={{ backgroundColor: swatchColor }}
+                  />
                 ) : (
                   <span
                     className={`block w-4 border-t ${LEGEND_DASHED_LABELS.has(label) ? 'border-dashed' : 'border-solid'}`}
@@ -117,7 +120,9 @@ export function ShotChartControls({
             onClick={onStop}
             className='btn btn-ghost btn-xs h-7 min-h-0 w-7 p-0'
             disabled={isReplayExporting && !isVideoExportActive}
-            aria-label={isVideoExportActive ? 'Cancel replay export' : 'Stop replay and restore chart'}
+            aria-label={
+              isVideoExportActive ? 'Cancel replay export' : 'Stop replay and restore chart'
+            }
             title={isVideoExportActive ? 'Cancel replay export' : 'Stop replay and restore chart'}
           >
             <FontAwesomeIcon icon={faStop} className='text-[10px] opacity-80' />
@@ -135,8 +140,8 @@ export function ShotChartControls({
               <FontAwesomeIcon icon={faFileExport} className='text-[11px] opacity-80' />
             </button>
             {exportMenuState.open ? (
-              <div className='bg-base-100/95 border-base-content/10 absolute right-0 top-full z-[70] mt-2 w-[min(92vw,15rem)] rounded-xl border p-3 text-[12px] shadow-xl backdrop-blur-md'>
-                <div className='mb-2 text-[11px] font-semibold uppercase tracking-wide opacity-60'>
+              <div className='bg-base-100/95 border-base-content/10 absolute top-full right-0 z-[70] mt-2 w-[min(92vw,15rem)] rounded-xl border p-3 text-[12px] shadow-xl backdrop-blur-md'>
+                <div className='mb-2 text-[11px] font-semibold tracking-wide uppercase opacity-60'>
                   Export Shot
                 </div>
                 <div className='space-y-1'>
@@ -154,7 +159,7 @@ export function ShotChartControls({
                       className={`flex items-center gap-2 rounded-md px-2 py-1.5 ${
                         option.disabled
                           ? 'cursor-not-allowed opacity-50'
-                          : 'cursor-pointer hover:bg-base-content/5'
+                          : 'hover:bg-base-content/5 cursor-pointer'
                       }`}
                     >
                       <input
@@ -170,7 +175,7 @@ export function ShotChartControls({
                   ))}
                 </div>
                 {exportMenuState.exportType !== 'json' ? (
-                  <label className='mt-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-base-content/5'>
+                  <label className='hover:bg-base-content/5 mt-2 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5'>
                     <input
                       type='checkbox'
                       className='checkbox checkbox-xs'
@@ -181,7 +186,7 @@ export function ShotChartControls({
                   </label>
                 ) : null}
                 {exportMenuState.exportType === 'video' && shouldShowWebmToggle ? (
-                  <div className='mt-1 rounded-md px-2 py-1.5 hover:bg-base-content/5'>
+                  <div className='hover:bg-base-content/5 mt-1 rounded-md px-2 py-1.5'>
                     <div className='flex items-center gap-2'>
                       <label className='flex min-w-0 flex-1 cursor-pointer items-center gap-2'>
                         <input
@@ -239,7 +244,9 @@ export function ShotChartControls({
             onClick={onChartHeightToggle}
             className='btn btn-ghost btn-xs h-7 min-h-0 w-7 p-0'
             disabled={isControlsLocked || isFullDisplay}
-            aria-label={mainChartHeight === MAIN_CHART_HEIGHT_BIG ? 'Minimize chart' : 'Maximize chart'}
+            aria-label={
+              mainChartHeight === MAIN_CHART_HEIGHT_BIG ? 'Minimize chart' : 'Maximize chart'
+            }
             title={mainChartHeight === MAIN_CHART_HEIGHT_BIG ? 'Minimize chart' : 'Maximize chart'}
           >
             <FontAwesomeIcon
@@ -256,11 +263,7 @@ export function ShotChartControls({
             title={isFullDisplay ? 'Close full display' : 'Open full display'}
           >
             <FontAwesomeIcon
-              icon={
-                isFullDisplay
-                  ? faDownLeftAndUpRightToCenter
-                  : faUpRightAndDownLeftFromCenter
-              }
+              icon={isFullDisplay ? faDownLeftAndUpRightToCenter : faUpRightAndDownLeftFromCenter}
               className='text-[11px] opacity-80'
             />
           </button>
@@ -285,7 +288,7 @@ export function ShotChartControls({
 
       {shouldShowReplayFocusHint ? (
         <div className='mb-2 px-1'>
-          <div className='inline-flex items-center rounded-md border border-base-content/10 bg-base-100/70 px-2.5 py-1 text-[10px] font-semibold text-[var(--analyzer-warning-orange)] shadow-sm'>
+          <div className='border-base-content/10 bg-base-100/70 inline-flex items-center rounded-md border px-2.5 py-1 text-[10px] font-semibold text-[var(--analyzer-warning-orange)] shadow-sm'>
             Keep this window focused while the replay is being recorded.
           </div>
         </div>
@@ -295,5 +298,7 @@ export function ShotChartControls({
 }
 
 export function getNextChartHeight(currentHeight) {
-  return currentHeight === MAIN_CHART_HEIGHT_SMALL ? MAIN_CHART_HEIGHT_BIG : MAIN_CHART_HEIGHT_SMALL;
+  return currentHeight === MAIN_CHART_HEIGHT_SMALL
+    ? MAIN_CHART_HEIGHT_BIG
+    : MAIN_CHART_HEIGHT_SMALL;
 }
