@@ -144,11 +144,7 @@ export function buildExternalTooltipState({
   }
 
   const tooltipItems = Array.isArray(tooltip.dataPoints) ? tooltip.dataPoints : [];
-  const rows = buildExternalTooltipRows(
-    tooltipItems,
-    getHoverWaterValuesAtX,
-    tooltipColorByLabel,
-  );
+  const rows = buildExternalTooltipRows(tooltipItems, getHoverWaterValuesAtX, tooltipColorByLabel);
   const titleLines = Array.isArray(tooltip.title)
     ? tooltip.title.filter(title => typeof title === 'string' && title.trim().length > 0)
     : [];
@@ -219,7 +215,7 @@ export function ShotChartExternalTooltip({ tooltipRef, state, layout }) {
       {state.rows.map((row, index) => (
         <div
           key={`${row.label}-${row.valueText}-${index}`}
-          className={`shot-chart-tooltip__row${row.spacerBefore ? ' shot-chart-tooltip__row--spacer' : ''}`}
+          className={`shot-chart-tooltip__row${row.spacerBefore ? 'shot-chart-tooltip__row--spacer' : ''}`}
         >
           <span
             className='shot-chart-tooltip__dot'
