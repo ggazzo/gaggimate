@@ -384,8 +384,7 @@ export function LibraryPanel({
         const deleteKey =
           item.source === 'gaggimate' ? item.id : item.storageKey || item.name || item.id;
         await libraryService.deleteShot(deleteKey, item.source);
-      }
-      else {
+      } else {
         const deleteKey =
           item.source === 'gaggimate' ? item.profileId || item.id : item.name || item.label;
         await libraryService.deleteProfile(deleteKey, item.source);
@@ -468,9 +467,7 @@ export function LibraryPanel({
       setCollapsed(true);
       const loadKey =
         item.source === 'gaggimate' ? item.id : item.storageKey || item.name || item.id;
-      const full = item.loaded
-        ? item
-        : await libraryService.loadShot(loadKey, item.source);
+      const full = item.loaded ? item : await libraryService.loadShot(loadKey, item.source);
       await onShotLoad(full, item.name || item.storageKey || item.id);
       if (wasLibraryOpen) {
         onShotLoadedFromLibrary?.();
@@ -512,9 +509,7 @@ export function LibraryPanel({
       <div ref={barRef} style={fixedBarStyle}>
         <div
           className={`bg-base-100/80 border-base-content/10 overflow-hidden border backdrop-blur-md transition-all duration-200 ${
-            collapsed
-              ? 'rounded-xl shadow-lg'
-              : 'rounded-t-xl border-b-0 shadow-none'
+            collapsed ? 'rounded-xl shadow-lg' : 'rounded-t-xl border-b-0 shadow-none'
           }`}
         >
           <StatusBar
@@ -597,7 +592,11 @@ export function LibraryPanel({
               <div className='max-h-[75vh] overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-hidden'>
                 <div className='grid grid-cols-1 gap-x-4 gap-y-4 p-4 lg:grid-cols-2 lg:gap-x-1.5'>
                   {/* SHOTS SECTION */}
-                  <div className={mobileActiveSection === 'shots' ? 'block lg:block' : 'hidden lg:block'}>
+                  <div
+                    className={
+                      mobileActiveSection === 'shots' ? 'block lg:block' : 'hidden lg:block'
+                    }
+                  >
                     <LibrarySection
                       title='Shots'
                       items={shots}
@@ -612,7 +611,8 @@ export function LibraryPanel({
                         setShotsSort({
                           key: k,
                           order:
-                            o || (shotsSort.key === k && shotsSort.order === 'desc' ? 'asc' : 'desc'),
+                            o ||
+                            (shotsSort.key === k && shotsSort.order === 'desc' ? 'asc' : 'desc'),
                         })
                       }
                       onSourceFilterChange={setShotsSourceFilter}
@@ -659,7 +659,11 @@ export function LibraryPanel({
                   </div>
 
                   {/* PROFILES SECTION */}
-                  <div className={mobileActiveSection === 'profiles' ? 'block lg:block' : 'hidden lg:block'}>
+                  <div
+                    className={
+                      mobileActiveSection === 'profiles' ? 'block lg:block' : 'hidden lg:block'
+                    }
+                  >
                     <LibrarySection
                       title='Profiles'
                       items={profiles}
@@ -675,7 +679,9 @@ export function LibraryPanel({
                           key: k,
                           order:
                             o ||
-                            (profilesSort.key === k && profilesSort.order === 'desc' ? 'asc' : 'desc'),
+                            (profilesSort.key === k && profilesSort.order === 'desc'
+                              ? 'asc'
+                              : 'desc'),
                         })
                       }
                       onSourceFilterChange={setProfilesSourceFilter}

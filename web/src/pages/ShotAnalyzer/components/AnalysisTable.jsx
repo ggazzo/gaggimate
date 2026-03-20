@@ -113,28 +113,28 @@ function StopCalculationHelpPopover() {
         <FontAwesomeIcon icon={faCircleInfo} className='text-[13px]' />
       </summary>
       <div
-        className={`dropdown-content bg-base-100/95 border-base-content/10 text-base-content normal-case tracking-normal z-[90] max-h-[70vh] overflow-y-auto rounded-xl border p-3 text-[12px] leading-relaxed font-normal shadow-xl backdrop-blur-md ${
+        className={`dropdown-content bg-base-100/95 border-base-content/10 text-base-content z-[90] max-h-[70vh] overflow-y-auto rounded-xl border p-3 text-[12px] leading-relaxed font-normal tracking-normal normal-case shadow-xl backdrop-blur-md ${
           isWideViewport ? 'absolute right-0 bottom-full mb-2 w-[min(92vw,34rem)]' : ''
         }`}
         style={mobilePopoverStyle}
       >
         <div className='space-y-2.5'>
-          <p className='text-sm font-semibold leading-tight'>Stop Calculation (Analyzer only)</p>
+          <p className='text-sm leading-tight font-semibold'>Stop Calculation (Analyzer only)</p>
           <p className='opacity-85'>
             The <strong>Stop Calculation</strong> settings and{' '}
             <strong style={{ color: utilityColors.predictionInfoBlue }}>Calc</strong> values are
-            Analyzer-only tools. Future-value calculations are not performed by GaggiMate itself
-            and shot execution is not changed by these settings.
+            Analyzer-only tools. Future-value calculations are not performed by GaggiMate itself and
+            shot execution is not changed by these settings.
           </p>
 
-          <div className='rounded-lg bg-base-200/60 p-2'>
-            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
+          <div className='bg-base-200/60 rounded-lg p-2'>
+            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
               Status Labels
             </p>
             <div className='mt-1 space-y-1.5'>
               <p>
                 <span
-                  className={`mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight align-middle ${NEUTRAL_STATUS_BADGE_CLASS}`}
+                  className={`mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight ${NEUTRAL_STATUS_BADGE_CLASS}`}
                 >
                   REVIEW PHASE
                 </span>
@@ -144,7 +144,7 @@ function StopCalculationHelpPopover() {
               </p>
               <p>
                 <span
-                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight text-white align-middle'
+                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'
                   style={{
                     backgroundColor: utilityColors.warningOrange,
                     borderColor: utilityColors.warningOrange,
@@ -159,7 +159,7 @@ function StopCalculationHelpPopover() {
               </p>
               <p>
                 <span
-                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight text-white align-middle'
+                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'
                   style={{
                     backgroundColor: utilityColors.warningOrange,
                     borderColor: utilityColors.warningOrange,
@@ -173,8 +173,8 @@ function StopCalculationHelpPopover() {
             </div>
           </div>
 
-          <div className='rounded-lg bg-base-200/60 p-2'>
-            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
+          <div className='bg-base-200/60 rounded-lg p-2'>
+            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
               How stop detection works
             </p>
             <p>
@@ -201,8 +201,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='rounded-lg bg-base-200/60 p-2'>
-            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>Example</p>
+          <div className='bg-base-200/60 rounded-lg p-2'>
+            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>Example</p>
             <p>
               If a phase has a flow stop at <strong>1 ml/s</strong>, flow may briefly cross that
               threshold between two samples. A short calculation helps estimate the stop condition
@@ -210,8 +210,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='rounded-lg bg-base-200/60 p-2'>
-            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
+          <div className='bg-base-200/60 rounded-lg p-2'>
+            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
               Auto vs Manual
             </p>
             <p className='mt-1'>
@@ -228,8 +228,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='rounded-lg bg-base-200/60 p-2'>
-            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
+          <div className='bg-base-200/60 rounded-lg p-2'>
+            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
               Scale vs System
             </p>
             <p>
@@ -418,10 +418,7 @@ export function AnalysisTable({
                 : 'PHASE REVIEW ADVISED'
             }
             colorClass={NEUTRAL_STATUS_BADGE_CLASS}
-            title={
-              results.delayReviewMessage ||
-              'Unusually high inferred delay detected.'
-            }
+            title={results.delayReviewMessage || 'Unusually high inferred delay detected.'}
           />
         )}
       </div>
@@ -455,7 +452,10 @@ export function AnalysisTable({
                 />
               </div>
 
-              <div className='bg-base-content/10 hidden h-3 w-px shrink-0 sm:block' aria-hidden='true' />
+              <div
+                className='bg-base-content/10 hidden h-3 w-px shrink-0 sm:block'
+                aria-hidden='true'
+              />
 
               {/* Scroll Controls */}
               <div className={`${ANALYZER_COMPACT_GROUP_CLASSES} hidden sm:flex`}>
@@ -515,7 +515,9 @@ export function AnalysisTable({
                           className='shrink-0 text-[11px]'
                           style={{ color: columnVisual.color }}
                         />
-                        <span className='min-w-0 whitespace-normal break-words'>{getHeaderLabel(col)}</span>
+                        <span className='min-w-0 break-words whitespace-normal'>
+                          {getHeaderLabel(col)}
+                        </span>
                       </span>
                     </th>
                   );
@@ -548,7 +550,10 @@ export function AnalysisTable({
                       </div>
                     )}
                     {idx === results.phases.length - 1 && (
-                      <div className='leading-tight font-medium text-base-content/55' style={{ fontSize: '0.8em' }}>
+                      <div
+                        className='text-base-content/55 leading-tight font-medium'
+                        style={{ fontSize: '0.8em' }}
+                      >
                         {getBrewModeLabel(results.isBrewByWeight)}
                       </div>
                     )}
@@ -568,7 +573,9 @@ export function AnalysisTable({
             <tfoot className='border-base-content/10 text-base-content border-t-2'>
               <tr>
                 <td className={`border-r ${subtleDividerClass}`}></td>
-                <td className={`px-2 py-2 text-left ${strongDividerClass} ${primaryTableTextClass}`}>
+                <td
+                  className={`px-2 py-2 text-left ${strongDividerClass} ${primaryTableTextClass}`}
+                >
                   Total
                 </td>
                 {visibleColumns.map(col => (
@@ -588,10 +595,14 @@ export function AnalysisTable({
         <div className='bg-base-100 border-base-content/10 flex flex-col items-stretch gap-3 rounded-b-lg border-t px-4 py-3 text-[10px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'>
           {/* Left: Stop Calculation Inputs */}
           <div className='flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto sm:gap-4'>
-            <span className={`hidden select-none sm:inline ${secondaryTableTextClass}`}>Stop Calculation</span>
+            <span className={`hidden select-none sm:inline ${secondaryTableTextClass}`}>
+              Stop Calculation
+            </span>
             <div className='flex flex-wrap items-center gap-2'>
               {/* Shows Average Symbol ∅ if auto-delay is active */}
-              <span className={secondaryTableTextClass}>Scale{safeSettings.autoDelay ? ' ∅' : ''}</span>
+              <span className={secondaryTableTextClass}>
+                Scale{safeSettings.autoDelay ? ' ∅' : ''}
+              </span>
               <input
                 type='number'
                 min='0'
@@ -610,7 +621,9 @@ export function AnalysisTable({
             <div className='bg-base-content/10 mx-1 hidden h-3 w-px sm:block'></div>
             <div className='flex flex-wrap items-center gap-2'>
               {/* Shows Average Symbol ∅ if auto-delay is active */}
-              <span className={secondaryTableTextClass}>System{safeSettings.autoDelay ? ' ∅' : ''}</span>
+              <span className={secondaryTableTextClass}>
+                System{safeSettings.autoDelay ? ' ∅' : ''}
+              </span>
               <input
                 type='number'
                 min='0'
@@ -644,9 +657,15 @@ export function AnalysisTable({
 
           {/* Right: Legend */}
           <div className='text-base-content grid w-full grid-cols-3 gap-x-3 gap-y-1 select-none sm:flex sm:w-auto sm:items-center sm:gap-4'>
-            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>Avg (time weighted)</span>
-            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>S/E Start/End</span>
-            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>Range Min/Max</span>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>
+              Avg (time weighted)
+            </span>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>
+              S/E Start/End
+            </span>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>
+              Range Min/Max
+            </span>
           </div>
         </div>
       </div>
@@ -670,10 +689,10 @@ function CellContent({ phase, col, results, isTotal = false }) {
   // Helper for Boolean Status rendering
   const renderBool = val => {
     if (val === true) {
-      return <FontAwesomeIcon icon={faCheck} className='text-[1em] text-success' />;
+      return <FontAwesomeIcon icon={faCheck} className='text-success text-[1em]' />;
     }
     if (val === false) {
-      return <FontAwesomeIcon icon={faTimes} className='text-[1em] text-error' />;
+      return <FontAwesomeIcon icon={faTimes} className='text-error text-[1em]' />;
     }
     return <span className='text-base-content/60'>-</span>;
   };
@@ -838,7 +857,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
   if (isTotal) {
     if (isBoolean) return <div className='flex justify-end'>{booleanContent}</div>;
     return (
-      <span className='font-semibold text-base-content/90'>
+      <span className='text-base-content/90 font-semibold'>
         {mainValue}
         {unit}
       </span>
@@ -847,7 +866,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
 
   const isWeightCol = col.id === 'weight';
   const exitMatchesCol = isWeightCol
-    ? (phase.exit?.type === 'weight' || phase.exit?.type === 'volumetric')
+    ? phase.exit?.type === 'weight' || phase.exit?.type === 'volumetric'
     : phase.exit?.type === col.targetType;
   const isHit = exitMatchesCol;
 
@@ -921,7 +940,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
   if (col.targetType && phase.targetCalcValues) {
     const calcEntry =
       col.id === 'weight'
-        ? (phase.targetCalcValues['volumetric'] || phase.targetCalcValues['weight'])
+        ? phase.targetCalcValues['volumetric'] || phase.targetCalcValues['weight']
         : phase.targetCalcValues[col.targetType];
 
     if (calcEntry) {
@@ -1010,7 +1029,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
         </div>
       ) : (
         <span
-          className={isHit ? 'font-semibold' : 'font-medium text-base-content/85'}
+          className={isHit ? 'font-semibold' : 'text-base-content/85 font-medium'}
           style={isHit ? { color: utilityColors.stopRed } : {}}
         >
           {mainValue}

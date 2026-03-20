@@ -47,12 +47,12 @@ function SummaryStatCard({ icon, label, value, accentColorVar, tone = 'muted' })
 
         <div className='min-w-0 flex-1 text-center'>
           <div
-            className='truncate text-xl font-bold leading-tight sm:text-2xl'
+            className='truncate text-xl leading-tight font-bold sm:text-2xl'
             style={{ color: isStrong ? accent : 'inherit' }}
           >
             {value}
           </div>
-          <div className='mt-1 text-[10px] font-semibold uppercase tracking-wide opacity-60 sm:text-[11px]'>
+          <div className='mt-1 text-[10px] font-semibold tracking-wide uppercase opacity-60 sm:text-[11px]'>
             {label}
           </div>
         </div>

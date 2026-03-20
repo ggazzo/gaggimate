@@ -61,7 +61,9 @@ export function ShotChart({ shotData, results }) {
 
   const [visibility, setVisibility] = useState(INITIAL_VISIBILITY);
   const [mainChartHeight, setMainChartHeight] = useState(MAIN_CHART_HEIGHT_DEFAULT);
-  const [externalTooltipState, setExternalTooltipState] = useState(createHiddenExternalTooltipState);
+  const [externalTooltipState, setExternalTooltipState] = useState(
+    createHiddenExternalTooltipState,
+  );
   const [externalTooltipLayout, setExternalTooltipLayout] = useState(
     createHiddenExternalTooltipLayout,
   );
@@ -135,18 +137,14 @@ export function ShotChart({ shotData, results }) {
 
   // Full-display stays as a separate behavioral hook so the chart component only
   // decides where to render, not how the overlay manages viewport and scroll state.
-  const {
-    isFullDisplay,
-    toggleFullDisplay,
-    effectiveMainChartHeight,
-    effectiveTempChartHeight,
-  } = useShotChartFullDisplay({
-    isControlsLocked,
-    clearAllHoverRef,
-    onBeforeToggle: closeExportMenu,
-    mainChartHeight,
-    tempChartHeightRatio: TEMP_CHART_HEIGHT_RATIO,
-  });
+  const { isFullDisplay, toggleFullDisplay, effectiveMainChartHeight, effectiveTempChartHeight } =
+    useShotChartFullDisplay({
+      isControlsLocked,
+      clearAllHoverRef,
+      onBeforeToggle: closeExportMenu,
+      mainChartHeight,
+      tempChartHeightRatio: TEMP_CHART_HEIGHT_RATIO,
+    });
 
   useLayoutEffect(() => {
     // Tooltip size depends on the rendered content, so measure after paint and
@@ -176,7 +174,9 @@ export function ShotChart({ shotData, results }) {
       fallbackHeight: chartHeight,
     });
 
-    setExternalTooltipLayout(prev => (areTooltipLayoutsEqual(prev, nextLayout) ? prev : nextLayout));
+    setExternalTooltipLayout(prev =>
+      areTooltipLayoutsEqual(prev, nextLayout) ? prev : nextLayout,
+    );
   }, [externalTooltipState]);
 
   useEffect(() => {
@@ -258,33 +258,15 @@ export function ShotChart({ shotData, results }) {
     const brewModeMeta = results?.isBrewByWeight
       ? {
           label: BREW_BY_WEIGHT_LABEL,
-          backgroundColor: readCssColorVar(
-            '--analyzer-brew-by-weight-label-bg',
-            colors.weight,
-          ),
-          textColor: readCssColorVar(
-            '--analyzer-brew-by-weight-label-text',
-            '#ffffff',
-          ),
-          borderColor: readCssColorVar(
-            '--analyzer-brew-by-weight-label-border',
-            colors.weight,
-          ),
+          backgroundColor: readCssColorVar('--analyzer-brew-by-weight-label-bg', colors.weight),
+          textColor: readCssColorVar('--analyzer-brew-by-weight-label-text', '#ffffff'),
+          borderColor: readCssColorVar('--analyzer-brew-by-weight-label-border', colors.weight),
         }
       : {
           label: BREW_BY_TIME_LABEL,
-          backgroundColor: readCssColorVar(
-            '--analyzer-brew-by-time-label-bg',
-            '#475569',
-          ),
-          textColor: readCssColorVar(
-            '--analyzer-brew-by-time-label-text',
-            '#ffffff',
-          ),
-          borderColor: readCssColorVar(
-            '--analyzer-brew-by-time-label-border',
-            '#334155',
-          ),
+          backgroundColor: readCssColorVar('--analyzer-brew-by-time-label-bg', '#475569'),
+          textColor: readCssColorVar('--analyzer-brew-by-time-label-text', '#ffffff'),
+          borderColor: readCssColorVar('--analyzer-brew-by-time-label-border', '#334155'),
         };
 
     const model = buildShotChartModel({
@@ -384,7 +366,15 @@ export function ShotChart({ shotData, results }) {
       detachTempChartLayoutSync();
       destroyCharts();
     };
-  }, [shotData, results, visibility, isFullDisplay, hasWeightData, hasWeightFlowData, hideExternalTooltip]);
+  }, [
+    shotData,
+    results,
+    visibility,
+    isFullDisplay,
+    hasWeightData,
+    hasWeightFlowData,
+    hideExternalTooltip,
+  ]);
 
   if (!shotData?.samples?.length) {
     return null;

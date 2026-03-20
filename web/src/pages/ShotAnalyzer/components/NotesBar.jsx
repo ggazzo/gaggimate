@@ -34,7 +34,9 @@ function isTypingTarget(target) {
   const tag = activeElement.tagName?.toLowerCase();
   if (activeElement.isContentEditable) return true;
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
-  return !!activeElement.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]');
+  return !!activeElement.closest(
+    'input, textarea, select, [contenteditable="true"], [role="textbox"]',
+  );
 }
 
 function formatNotesBarDateTime(timestamp) {
@@ -81,14 +83,17 @@ function LoadedShotSummary({
   return (
     <button
       type='button'
-      className='block min-w-0 w-full cursor-pointer overflow-x-auto px-1 py-1.5 text-center scrollbar-none'
+      className='scrollbar-none block w-full min-w-0 cursor-pointer overflow-x-auto px-1 py-1.5 text-center'
       onClick={() => !isEditing && onToggleNotesExpanded && onToggleNotesExpanded()}
       title='Click to expand notes'
     >
-      <div className='mx-auto inline-flex min-w-max items-center justify-center' style={{ columnGap: chipGap }}>
+      <div
+        className='mx-auto inline-flex min-w-max items-center justify-center'
+        style={{ columnGap: chipGap }}
+      >
         {currentShot?.source === 'temp' ? (
           <span
-            className='inline-flex items-center justify-center text-base-content/45'
+            className='text-base-content/45 inline-flex items-center justify-center'
             style={{ lineHeight: 0 }}
             aria-label='VIEW'
             title='Temporary Analyzer View'
@@ -155,16 +160,16 @@ function ModeHintPortal({ modeHint, modeHintBadgeStyle, modeHintPosition, modeHi
 
   return createPortal(
     <div
-      className='pointer-events-none fixed z-[85] rounded-xl border border-base-content/10 bg-base-100/95 px-3 py-2 shadow-xl backdrop-blur-sm'
+      className='border-base-content/10 bg-base-100/95 pointer-events-none fixed z-[85] rounded-xl border px-3 py-2 shadow-xl backdrop-blur-sm'
       style={{
         top: `${modeHintPosition.top}px`,
         left: `${modeHintPosition.left}px`,
         width: 'min(22rem, calc(100vw - 2rem))',
       }}
     >
-      <div className='flex items-center gap-2 text-xs leading-5 text-base-content/80'>
+      <div className='text-base-content/80 flex items-center gap-2 text-xs leading-5'>
         <span
-          className='inline-flex h-5 shrink-0 items-center rounded-full border px-2 text-[10px] font-bold uppercase tracking-[0.14em]'
+          className='inline-flex h-5 shrink-0 items-center rounded-full border px-2 text-[10px] font-bold tracking-[0.14em] uppercase'
           style={modeHintBadgeStyle}
         >
           {modeHintVariant === 'browser' ? 'SAVE' : 'VIEW'}
@@ -334,7 +339,8 @@ export function NotesBar({
   // Navigation
   const currentIndex = hasShot
     ? shotList.findIndex(
-        s => getShotNotesKey(s) === getShotNotesKey(currentShot) && s.source === currentShot?.source,
+        s =>
+          getShotNotesKey(s) === getShotNotesKey(currentShot) && s.source === currentShot?.source,
       )
     : -1;
   const canGoPrev = hasShot && currentIndex > 0;
@@ -479,8 +485,7 @@ export function NotesBar({
   });
   const modeButtonClasses = getAnalyzerIconButtonClasses({
     tone: 'subtle',
-    className:
-      'btn btn-xs btn-ghost h-6 w-6 flex-shrink-0 rounded-lg p-0 hover:opacity-100',
+    className: 'btn btn-xs btn-ghost h-6 w-6 flex-shrink-0 rounded-lg p-0 hover:opacity-100',
   });
   const modeHintBadgeStyle =
     modeHintVariant === 'browser'
@@ -547,9 +552,7 @@ export function NotesBar({
             type='button'
             className={`${modeButtonClasses} ${importMode === 'browser' ? 'opacity-75' : 'opacity-60'}`}
             style={
-              importMode === 'browser'
-                ? { color: analyzerUiColors.sourceBadgeWebText }
-                : undefined
+              importMode === 'browser' ? { color: analyzerUiColors.sourceBadgeWebText } : undefined
             }
             onClick={handleModeToggle}
             title={
@@ -563,7 +566,10 @@ export function NotesBar({
                 : 'Switch import mode to Save to Browser'
             }
           >
-            <FontAwesomeIcon icon={importMode === 'browser' ? faLaptopFile : faEye} className='text-xs' />
+            <FontAwesomeIcon
+              icon={importMode === 'browser' ? faLaptopFile : faEye}
+              className='text-xs'
+            />
           </button>
         </div>
 

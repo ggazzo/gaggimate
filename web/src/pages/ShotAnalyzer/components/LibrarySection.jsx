@@ -118,7 +118,7 @@ export function LibrarySection({
               const [k, o] = e.target.value.split('-');
               onSortChange(k, o);
             }}
-            className='bg-base-100/50 border-base-content/10 hover:bg-base-content/5 hover:border-base-content/20 h-9 cursor-pointer rounded border px-2 text-xs outline-none transition-colors'
+            className='bg-base-100/50 border-base-content/10 hover:bg-base-content/5 hover:border-base-content/20 h-9 cursor-pointer rounded border px-2 text-xs transition-colors outline-none'
           >
             {isShot && <option value='shotDate-desc'>Date (New)</option>}
             {isShot && <option value='shotDate-asc'>Date (Old)</option>}

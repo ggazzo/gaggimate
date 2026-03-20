@@ -69,9 +69,7 @@ export function NotesBarExpanded({
   };
 
   return (
-    <div
-      className={`transition-all duration-200 ${borderClasses}`}
-    >
+    <div className={`transition-all duration-200 ${borderClasses}`}>
       <div className='px-4 py-3'>
         {isEditing ? (
           /* ── EDIT MODE: Vertical layout ── */
@@ -221,7 +219,7 @@ export function NotesBarExpanded({
             <div
               className={getAnalyzerSurfaceTriggerClasses({
                 className:
-                  'bg-base-200/50 min-h-[2rem] min-w-0 flex-1 cursor-pointer px-3 py-2 text-xs hover:text-base-content/80',
+                  'bg-base-200/50 hover:text-base-content/80 min-h-[2rem] min-w-0 flex-1 cursor-pointer px-3 py-2 text-xs',
               })}
               onClick={onCollapse}
               title='Click to collapse'
@@ -231,7 +229,7 @@ export function NotesBarExpanded({
             <button
               className={getAnalyzerTextButtonClasses({
                 className:
-                  'btn btn-sm border-base-content/10 bg-transparent text-base-content/70 shadow-none flex-shrink-0',
+                  'btn btn-sm border-base-content/10 text-base-content/70 flex-shrink-0 bg-transparent shadow-none',
                 tone: 'neutral',
               })}
               onClick={onEdit}

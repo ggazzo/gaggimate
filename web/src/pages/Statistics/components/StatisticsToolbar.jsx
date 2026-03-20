@@ -175,7 +175,9 @@ export function StatisticsToolbar({
   selectionHint = null,
 }) {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(() => !!query);
-  const [showDslSelectionPreview, setShowDslSelectionPreview] = useState(() => !!String(query || '').trim());
+  const [showDslSelectionPreview, setShowDslSelectionPreview] = useState(
+    () => !!String(query || '').trim(),
+  );
   const dslInputRef = useRef(null);
   const isBusy = loading || metadataLoading;
   const canExecute = canGo && !isBusy;
@@ -262,7 +264,7 @@ export function StatisticsToolbar({
       <div className='flex w-full min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1'>
         <details className='dropdown max-w-full'>
           <summary
-            className={`flex h-11 min-h-0 w-[4rem] list-none items-center justify-between rounded-lg border px-1.5 text-xs font-bold uppercase tracking-wide shadow-sm transition-colors [&::-webkit-details-marker]:hidden ${getPrimaryDropdownToneClasses()} ${isBusy ? 'pointer-events-none opacity-40' : ''}`}
+            className={`flex h-11 min-h-0 w-[4rem] list-none items-center justify-between rounded-lg border px-1.5 text-xs font-bold tracking-wide uppercase shadow-sm transition-colors [&::-webkit-details-marker]:hidden ${getPrimaryDropdownToneClasses()} ${isBusy ? 'pointer-events-none opacity-40' : ''}`}
             aria-label='Select source'
             title='Select source'
           >
@@ -276,7 +278,7 @@ export function StatisticsToolbar({
                 <button
                   key={opt.value}
                   type='button'
-                  className={`flex h-9 min-h-0 items-center justify-between rounded-lg border px-3 text-xs font-bold uppercase tracking-wide transition-colors ${getPrimaryDropdownToneClasses()} ${source === opt.value ? 'ring-1 ring-current/15' : ''}`}
+                  className={`flex h-9 min-h-0 items-center justify-between rounded-lg border px-3 text-xs font-bold tracking-wide uppercase transition-colors ${getPrimaryDropdownToneClasses()} ${source === opt.value ? 'ring-1 ring-current/15' : ''}`}
                   onClick={e => {
                     onSourceChange(opt.value);
                     closeParentDetails(e.currentTarget);
@@ -372,13 +374,15 @@ export function StatisticsToolbar({
           <button
             type='button'
             onClick={onClearFilters}
-            className='inline-flex h-11 min-h-0 w-11 flex-col items-center justify-center gap-0.5 rounded-lg border border-base-content/10 bg-base-100/45 px-0 text-base-content/70 shadow-sm transition-colors hover:bg-base-200/70 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-40'
+            className='border-base-content/10 bg-base-100/45 text-base-content/70 hover:bg-base-200/70 hover:text-base-content inline-flex h-11 min-h-0 w-11 flex-col items-center justify-center gap-0.5 rounded-lg border px-0 shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40'
             disabled={isBusy}
             aria-label={`Clear filters and selections (${resetAriaCount})`}
             title={`Clear filters and selections (${resetAriaCount})`}
           >
             <FontAwesomeIcon icon={faUndo} className='text-lg leading-none' />
-            <span className='text-[10px] leading-none font-semibold tabular-nums'>{candidateLabel}</span>
+            <span className='text-[10px] leading-none font-semibold tabular-nums'>
+              {candidateLabel}
+            </span>
           </button>
 
           <button
@@ -388,7 +392,7 @@ export function StatisticsToolbar({
               onGo();
             }}
             disabled={!canExecute}
-            className='border-success/50 text-success hover:bg-success hover:border-success inline-flex h-11 min-h-0 w-[5.5rem] items-center justify-center rounded-lg border-2 bg-base-100/50 shadow-sm transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
+            className='border-success/50 text-success hover:bg-success hover:border-success bg-base-100/50 inline-flex h-11 min-h-0 w-[5.5rem] items-center justify-center rounded-lg border-2 shadow-sm transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
             aria-label='Run statistics'
             title='Run statistics'
           >
@@ -414,7 +418,9 @@ export function StatisticsToolbar({
             />
             {showDateRangeLabelInTrigger && (
               <>
-                <span className='shrink-0 font-semibold tracking-wide'>{dateRangeDisplay.label}</span>
+                <span className='shrink-0 font-semibold tracking-wide'>
+                  {dateRangeDisplay.label}
+                </span>
                 <span className='text-base-content/35 shrink-0'>·</span>
               </>
             )}
@@ -422,38 +428,41 @@ export function StatisticsToolbar({
               {dateRangeDisplay.fromText || 'No dates'}
               {dateRangeDisplay.toText && (
                 <>
-                  <span className='mx-1.5 inline-block align-middle text-base-content/35'>
+                  <span className='text-base-content/35 mx-1.5 inline-block align-middle'>
                     <FontAwesomeIcon icon={faArrowRightLong} className='text-[9px]' />
                   </span>
                   {dateRangeDisplay.toText}
                 </>
               )}
             </span>
-            <FontAwesomeIcon icon={faChevronDown} className='-ml-0.5 shrink-0 text-[9px] opacity-50' />
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              className='-ml-0.5 shrink-0 text-[9px] opacity-50'
+            />
           </summary>
 
           <div className='dropdown-content bg-base-100/95 border-base-content/10 z-[65] mt-2 w-[min(92vw,26rem)] rounded-xl border p-3 shadow-xl backdrop-blur-md'>
             <div className='grid gap-2'>
-              <label className='flex items-center gap-2 text-[11px] font-semibold text-base-content/75'>
+              <label className='text-base-content/75 flex items-center gap-2 text-[11px] font-semibold'>
                 <span className='w-10 shrink-0'>From</span>
                 <input
                   type='date'
                   value={dateFromLocal}
                   onInput={e => onDateFromChange(e.target.value)}
-                  className='analyzer-statistics-datetime input input-bordered h-9 min-h-0 w-full border-base-content/10 bg-base-100/50 text-xs'
+                  className='analyzer-statistics-datetime input input-bordered border-base-content/10 bg-base-100/50 h-9 min-h-0 w-full text-xs'
                   disabled={isBusy}
                   aria-label='Start date'
                   title='Start date'
                 />
               </label>
 
-              <label className='flex items-center gap-2 text-[11px] font-semibold text-base-content/75'>
+              <label className='text-base-content/75 flex items-center gap-2 text-[11px] font-semibold'>
                 <span className='w-10 shrink-0'>To</span>
                 <input
                   type='date'
                   value={dateToLocal}
                   onInput={e => onDateToChange(e.target.value)}
-                  className='analyzer-statistics-datetime input input-bordered h-9 min-h-0 w-full border-base-content/10 bg-base-100/50 text-xs'
+                  className='analyzer-statistics-datetime input input-bordered border-base-content/10 bg-base-100/50 h-9 min-h-0 w-full text-xs'
                   disabled={isBusy}
                   aria-label='End date'
                   title='End date'
@@ -462,7 +471,7 @@ export function StatisticsToolbar({
             </div>
 
             <div className='mt-3 flex items-center justify-between gap-2'>
-              <div className='text-[10px] text-base-content/55'>
+              <div className='text-base-content/55 text-[10px]'>
                 {dateRangeDisplay.isAuto
                   ? 'Using auto range from current shot selection.'
                   : 'Manual date filter is active.'}
@@ -474,7 +483,7 @@ export function StatisticsToolbar({
                   onDateToChange('');
                 }}
                 disabled={isBusy || (!dateFromLocal && !dateToLocal)}
-                className='btn btn-ghost btn-xs h-7 min-h-0 rounded-md border border-base-content/10 px-2 text-[10px] font-semibold'
+                className='btn btn-ghost btn-xs border-base-content/10 h-7 min-h-0 rounded-md border px-2 text-[10px] font-semibold'
                 title='Clear date filter'
               >
                 Clear Date Filter
@@ -493,7 +502,7 @@ export function StatisticsToolbar({
           {showAdvancedSearch && (
             <div
               ref={dslInputRef}
-              className='min-w-0 basis-full md:min-w-[16rem] md:max-w-[38rem] md:flex-1'
+              className='min-w-0 basis-full md:max-w-[38rem] md:min-w-[16rem] md:flex-1'
             >
               <input
                 type='text'
@@ -505,7 +514,7 @@ export function StatisticsToolbar({
                 onFocus={() => setShowDslSelectionPreview(true)}
                 onClick={() => setShowDslSelectionPreview(true)}
                 placeholder='name:"325"; profile:3_0_25; date:>h-7d;'
-                className='input input-bordered h-9 min-h-0 w-full border-base-content/10 bg-base-100/50 text-xs shadow-sm'
+                className='input input-bordered border-base-content/10 bg-base-100/50 h-9 min-h-0 w-full text-xs shadow-sm'
                 disabled={isBusy}
               />
             </div>
@@ -514,7 +523,7 @@ export function StatisticsToolbar({
           {showAdvancedSearch && (
             <button
               type='button'
-              className={`inline-flex h-9 min-h-0 w-12 items-center justify-center rounded-lg border border-base-content/10 px-2 text-[10px] font-medium tracking-wide shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+              className={`border-base-content/10 inline-flex h-9 min-h-0 w-12 items-center justify-center rounded-lg border px-2 text-[10px] font-medium tracking-wide shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                 calcMode
                   ? 'text-base-content/80 hover:bg-base-200/50 hover:text-base-content'
                   : 'bg-base-100/45 text-base-content/70 hover:bg-base-200/60 hover:text-base-content'
@@ -563,8 +572,13 @@ export function StatisticsToolbar({
             background: 'color-mix(in srgb, var(--analyzer-warning-orange) 9%, transparent)',
           }}
         >
-          <div className='min-w-[14rem] flex-1 text-[11px] leading-relaxed' style={WARNING_ORANGE_TEXT_MUTED_STYLE}>
-            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>Date Basis:</span>{' '}
+          <div
+            className='min-w-[14rem] flex-1 text-[11px] leading-relaxed'
+            style={WARNING_ORANGE_TEXT_MUTED_STYLE}
+          >
+            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>
+              Date Basis:
+            </span>{' '}
             <span className='text-base-content/80'>
               {dateBasisWarningMessage ||
                 'Some shots have no shot timestamp. Choose how date handling should treat them.'}
@@ -603,9 +617,13 @@ export function StatisticsToolbar({
           {topError ? (
             <span className='text-error font-semibold'>{topError}</span>
           ) : metadataError ? (
-            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>{metadataError}</span>
+            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>
+              {metadataError}
+            </span>
           ) : (
-            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>{topWarning}</span>
+            <span className='font-semibold' style={WARNING_ORANGE_TEXT_STYLE}>
+              {topWarning}
+            </span>
           )}
           {parseErrors.length > 1 && (
             <span className='text-error/70'>+{parseErrors.length - 1} more</span>
@@ -629,7 +647,7 @@ export function StatisticsToolbar({
         <div className='bg-base-100/55 border-base-content/10 flex w-full min-w-0 flex-col gap-3 rounded-lg border p-3 shadow-sm'>
           {profilePreviewItems.length > 0 && (
             <div className='min-w-0 space-y-2'>
-              <div className='text-secondary text-[10px] font-semibold uppercase tracking-wide'>
+              <div className='text-secondary text-[10px] font-semibold tracking-wide uppercase'>
                 Profiles ({profilePreviewItems.length})
               </div>
               <div className='max-h-24 overflow-auto'>
@@ -649,18 +667,18 @@ export function StatisticsToolbar({
 
           {shotPreviewItems.length > 0 && (
             <div className='min-w-0 space-y-2'>
-              <div className='text-primary text-[10px] font-semibold uppercase tracking-wide'>
+              <div className='text-primary text-[10px] font-semibold tracking-wide uppercase'>
                 Shots ({shotPreviewItems.length})
               </div>
-              <div className='max-h-40 overflow-auto rounded-md border border-base-content/8 bg-base-100/40'>
+              <div className='border-base-content/8 bg-base-100/40 max-h-40 overflow-auto rounded-md border'>
                 <div className='divide-base-content/8 divide-y'>
                   {shotPreviewItems.map(item => (
                     <div key={item.id} className='flex min-w-0 flex-col gap-0.5 px-2.5 py-2'>
-                      <div className='truncate text-[11px] font-semibold text-base-content/85'>
+                      <div className='text-base-content/85 truncate text-[11px] font-semibold'>
                         {item.fileStem || item.primary}
                       </div>
                       {(item.shotId || item.secondary) && (
-                        <div className='truncate text-[10px] text-base-content/55'>
+                        <div className='text-base-content/55 truncate text-[10px]'>
                           {item.shotId ? `ID: ${item.shotId}` : ''}
                           {item.shotId && item.secondary ? ' • ' : ''}
                           {item.secondary || ''}

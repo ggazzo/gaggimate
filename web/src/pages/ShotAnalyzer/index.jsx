@@ -281,7 +281,10 @@ export function ShotAnalyzer() {
 
           if (matchId !== profileMatchIdRef.current) return; // stale
 
-          const matchedProfile = await loadPreferredAutoMatchedProfile(shotWithMetadata, allProfiles);
+          const matchedProfile = await loadPreferredAutoMatchedProfile(
+            shotWithMetadata,
+            allProfiles,
+          );
 
           if (matchId !== profileMatchIdRef.current) return; // stale
 
@@ -365,10 +368,13 @@ export function ShotAnalyzer() {
               setCurrentProfileName('No Profile Loaded');
             }}
             onShowStats={() => {
-              sessionStorage.setItem('statsInitialContext', JSON.stringify({
-                profileName: currentProfileName,
-                source: 'both',
-              }));
+              sessionStorage.setItem(
+                'statsInitialContext',
+                JSON.stringify({
+                  profileName: currentProfileName,
+                  source: 'both',
+                }),
+              );
             }}
             statsHref={statsHref}
             importMode={importMode}

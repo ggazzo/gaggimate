@@ -216,7 +216,9 @@ export function StatusBar({
               className='mx-1.5 flex-1 truncate text-center text-sm font-bold'
               title='Open library'
             >
-              {currentShot?.source === 'gaggimate' ? `#${currentShot.id}` : cleanName(currentShotName)}
+              {currentShot?.source === 'gaggimate'
+                ? `#${currentShot.id}`
+                : cleanName(currentShotName)}
             </button>
             {currentShot ? (
               <button
@@ -265,7 +267,6 @@ export function StatusBar({
 
             {renderProfileTrailingControl()}
           </div>
-
         </div>
         <input
           ref={fileInputRef}

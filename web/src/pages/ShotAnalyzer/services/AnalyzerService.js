@@ -370,18 +370,18 @@ export function calculateShotMetrics(shotData, profileData, settings) {
           const sInterval = shotData.sampleInterval || 250;
           const sIntervalSec = sInterval / 1000;
           const currentKeyIndex = sortedPhaseKeys.indexOf(phaseNum);
-          const nextPhaseKey = currentKeyIndex >= 0 && currentKeyIndex < sortedPhaseKeys.length - 1
-            ? sortedPhaseKeys[currentKeyIndex + 1]
-            : null;
-          const nextPhaseSamples = nextPhaseKey ? (phases[nextPhaseKey] || []) : [];
+          const nextPhaseKey =
+            currentKeyIndex >= 0 && currentKeyIndex < sortedPhaseKeys.length - 1
+              ? sortedPhaseKeys[currentKeyIndex + 1]
+              : null;
+          const nextPhaseSamples = nextPhaseKey ? phases[nextPhaseKey] || [] : [];
           const lastNonExtendedIndex = getLastNonExtendedIndex(samples);
           const lastNonExtendedSample =
             lastNonExtendedIndex >= 0 ? samples[lastNonExtendedIndex] : samples[samples.length - 1];
 
           // Anchor: last non-extended sample for last phase, otherwise last sample
-          const anchorIdx = isLastPhase && lastNonExtendedIndex >= 0
-            ? lastNonExtendedIndex
-            : samples.length - 1;
+          const anchorIdx =
+            isLastPhase && lastNonExtendedIndex >= 0 ? lastNonExtendedIndex : samples.length - 1;
           const anchor = samples[anchorIdx];
           const prevAnchor = anchorIdx > 0 ? samples[anchorIdx - 1] : anchor;
 
@@ -405,18 +405,28 @@ export function calculateShotMetrics(shotData, profileData, settings) {
               const isWt = tgt.type === 'volumetric' || tgt.type === 'weight';
               if (isWt && !isBrewByWeight) continue;
               if (isWt && scaleConnectionBrokenPermanently) continue;
-              if (isLastPhase && isWt && lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G) continue;
+              if (
+                isLastPhase &&
+                isWt &&
+                lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G
+              )
+                continue;
 
               let val;
-              if (tgt.type === 'pressure') { val = p; }
-              else if (tgt.type === 'flow') { val = f; }
-              else if (isWt) { val = w; }
-              else if (tgt.type === 'pumped') { val = pumped; }
-              else continue;
+              if (tgt.type === 'pressure') {
+                val = p;
+              } else if (tgt.type === 'flow') {
+                val = f;
+              } else if (isWt) {
+                val = w;
+              } else if (tgt.type === 'pumped') {
+                val = pumped;
+              } else continue;
 
               let hit = false;
               if (tgt.operator === 'gte' && val >= tgt.value) {
-                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G)) hit = true;
+                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G))
+                  hit = true;
               }
               if (tgt.operator === 'lte' && val <= tgt.value) hit = true;
 
@@ -435,7 +445,12 @@ export function calculateShotMetrics(shotData, profileData, settings) {
               const isWt = tgt.type === 'volumetric' || tgt.type === 'weight';
               if (isWt && !isBrewByWeight) continue;
               if (isWt && scaleConnectionBrokenPermanently) continue;
-              if (isLastPhase && isWt && lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G) continue;
+              if (
+                isLastPhase &&
+                isWt &&
+                lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G
+              )
+                continue;
 
               let anchorVal, nextVal, predVal;
               if (tgt.type === 'pressure') {
@@ -463,7 +478,8 @@ export function calculateShotMetrics(shotData, profileData, settings) {
               // No tolerance at look-ahead steps — these are actual/predicted values, not raw sensor readings
               let hit = false;
               if (tgt.operator === 'gte' && val >= tgt.value) {
-                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G)) hit = true;
+                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G))
+                  hit = true;
               }
               if (tgt.operator === 'lte' && val <= tgt.value) hit = true;
 
@@ -479,7 +495,7 @@ export function calculateShotMetrics(shotData, profileData, settings) {
           };
 
           // --- Helper: predict values at N steps ahead (pure extrapolation) ---
-          const predictAt = (nSteps) => {
+          const predictAt = nSteps => {
             const h = nSteps * sIntervalSec;
             return {
               p: Math.max(0, anchor.cp + pSlope * h),
@@ -527,9 +543,15 @@ export function calculateShotMetrics(shotData, profileData, settings) {
               const isWt = tgt.type === 'volumetric' || tgt.type === 'weight';
               if (isWt && !isBrewByWeight) continue;
               if (isWt && scaleConnectionBrokenPermanently) continue;
-              if (isLastPhase && isWt && lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G) continue;
+              if (
+                isLastPhase &&
+                isWt &&
+                lastNonExtendedSample.v > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G
+              )
+                continue;
 
-              let val, delayMs = 0;
+              let val,
+                delayMs = 0;
               if (tgt.type === 'pressure') {
                 val = Math.max(0, anchor.cp + pSlope * sensorDelaySec);
                 delayMs = normSensorMs;
@@ -547,7 +569,8 @@ export function calculateShotMetrics(shotData, profileData, settings) {
               // No tolerance for predicted values — tolerance only at step 1 (raw sensor readings)
               let hit = false;
               if (tgt.operator === 'gte' && val >= tgt.value) {
-                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G)) hit = true;
+                if (!(isLastPhase && isWt && val > tgt.value + LAST_PHASE_OVERSHOOT_MAX_G))
+                  hit = true;
               }
               if (tgt.operator === 'lte' && val <= tgt.value) hit = true;
 
@@ -602,16 +625,32 @@ export function calculateShotMetrics(shotData, profileData, settings) {
 
                 let calcVal;
                 const nextSampleIdx = matchStep - 1;
-                if (isAutoAdjusted && nextSampleIdx >= 0 && nextSampleIdx < nextPhaseSamples.length) {
+                if (
+                  isAutoAdjusted &&
+                  nextSampleIdx >= 0 &&
+                  nextSampleIdx < nextPhaseSamples.length
+                ) {
                   const ns = nextPhaseSamples[nextSampleIdx];
                   const horizon = matchStep * sIntervalSec;
                   const nextDt = (ns.t - anchor.t) / 1000;
                   let anchorVal, nextVal, predVal;
-                  if (tgt.type === 'pressure') { anchorVal = anchor.cp; nextVal = ns.cp; predVal = Math.max(0, anchor.cp + pSlope * horizon); }
-                  else if (tgt.type === 'flow') { anchorVal = anchor.fl; nextVal = ns.fl; predVal = Math.max(0, anchor.fl + fSlope * horizon); }
-                  else if (isWt) { anchorVal = anchor.v; nextVal = ns.v; predVal = anchor.v + (wRate > 0 ? wRate * horizon : 0); }
-                  else if (tgt.type === 'pumped') { anchorVal = anchorPumped; nextVal = anchorPumped + ns.fl * nextDt; predVal = anchorPumped + Math.max(0, anchor.fl) * horizon; }
-                  else continue;
+                  if (tgt.type === 'pressure') {
+                    anchorVal = anchor.cp;
+                    nextVal = ns.cp;
+                    predVal = Math.max(0, anchor.cp + pSlope * horizon);
+                  } else if (tgt.type === 'flow') {
+                    anchorVal = anchor.fl;
+                    nextVal = ns.fl;
+                    predVal = Math.max(0, anchor.fl + fSlope * horizon);
+                  } else if (isWt) {
+                    anchorVal = anchor.v;
+                    nextVal = ns.v;
+                    predVal = anchor.v + (wRate > 0 ? wRate * horizon : 0);
+                  } else if (tgt.type === 'pumped') {
+                    anchorVal = anchorPumped;
+                    nextVal = anchorPumped + ns.fl * nextDt;
+                    predVal = anchorPumped + Math.max(0, anchor.fl) * horizon;
+                  } else continue;
                   const dirValid = isDirectionallyValidLookAhead(tgt.operator, anchorVal, nextVal);
                   calcVal = dirValid ? nextVal : predVal;
                 } else {
@@ -619,7 +658,8 @@ export function calculateShotMetrics(shotData, profileData, settings) {
                   if (tgt.type === 'pressure') calcVal = Math.max(0, anchor.cp + pSlope * h);
                   else if (tgt.type === 'flow') calcVal = Math.max(0, anchor.fl + fSlope * h);
                   else if (isWt) calcVal = anchor.v + (wRate > 0 ? wRate * h : 0);
-                  else if (tgt.type === 'pumped') calcVal = anchorPumped + Math.max(0, anchor.fl) * h;
+                  else if (tgt.type === 'pumped')
+                    calcVal = anchorPumped + Math.max(0, anchor.fl) * h;
                   else continue;
                 }
 
@@ -726,13 +766,12 @@ export function calculateShotMetrics(shotData, profileData, settings) {
                 const stoppedBelowTargetHighDelayCandidate =
                   undershootAtEnd >= LAST_PHASE_UNDERSHOOT_MIN_G &&
                   undershootAtEnd <= LAST_PHASE_UNDERSHOOT_MAX_G;
-                if (
-                  !exitType &&
-                  stoppedBelowTargetHighDelayCandidate &&
-                  conservativeRate > 0.1
-                ) {
+                if (!exitType && stoppedBelowTargetHighDelayCandidate && conservativeRate > 0.1) {
                   const estimatedDelay = (undershootAtEnd / conservativeRate) * 1000;
-                  if (estimatedDelay > 2000 && estimatedDelay <= LAST_PHASE_ESTIMATED_DELAY_MAX_MS) {
+                  if (
+                    estimatedDelay > 2000 &&
+                    estimatedDelay <= LAST_PHASE_ESTIMATED_DELAY_MAX_MS
+                  ) {
                     setEstimatedScaleDelay(estimatedDelay);
 
                     exitReason = formatStopReason(weightTarget.type);
@@ -742,14 +781,18 @@ export function calculateShotMetrics(shotData, profileData, settings) {
                     sumScaleDelay += estimatedDelay;
                     countScaleHits++;
                     setPhaseDelayReviewHint(estimatedDelay, 'fallback-undershoot');
-                    analyzerDebug(debugEnabled, `Last-phase fallback weight stop (undershoot high delay)`, {
-                      shotId: shotData.id,
-                      phaseName: displayName,
-                      stopWeight: stopW,
-                      finalWeight: finalW,
-                      targetWeight: weightTarget.value,
-                      estimatedDelayMs: Math.round(estimatedDelay),
-                    });
+                    analyzerDebug(
+                      debugEnabled,
+                      `Last-phase fallback weight stop (undershoot high delay)`,
+                      {
+                        shotId: shotData.id,
+                        phaseName: displayName,
+                        stopWeight: stopW,
+                        finalWeight: finalW,
+                        targetWeight: weightTarget.value,
+                        estimatedDelayMs: Math.round(estimatedDelay),
+                      },
+                    );
                   }
                 }
               }
@@ -903,12 +946,9 @@ export function calculateShotMetrics(shotData, profileData, settings) {
     .filter(phase => phase.delayReviewHint);
   const hasDelayReviewHint = delayReviewPhases.length > 0;
   const primaryDelayReview = hasDelayReviewHint
-    ? [...delayReviewPhases].sort(
-        (a, b) => (b.delayReviewMs || 0) - (a.delayReviewMs || 0),
-      )[0]
+    ? [...delayReviewPhases].sort((a, b) => (b.delayReviewMs || 0) - (a.delayReviewMs || 0))[0]
     : null;
-  const hideLastPhaseDelayReview =
-    primaryDelayReview?.tablePhaseNumber === analyzedPhases.length;
+  const hideLastPhaseDelayReview = primaryDelayReview?.tablePhaseNumber === analyzedPhases.length;
   const shouldExposeDelayReview = Boolean(primaryDelayReview) && !hideLastPhaseDelayReview;
   const delayReviewPhaseNumber = shouldExposeDelayReview
     ? primaryDelayReview.tablePhaseNumber

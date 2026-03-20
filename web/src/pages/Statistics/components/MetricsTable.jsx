@@ -170,11 +170,13 @@ function MetricRangeViz({ row, metric }) {
         </div>
 
         <div className='min-w-0 flex-1'>
-          <div className={`truncate text-[10px] font-semibold uppercase tracking-wide ${row.colorClass}`}>
+          <div
+            className={`truncate text-[10px] font-semibold tracking-wide uppercase ${row.colorClass}`}
+          >
             {row.label}
           </div>
           <div className='mt-1 flex items-end gap-1.5'>
-            <span className='truncate font-mono text-xl font-bold leading-tight sm:text-2xl'>
+            <span className='truncate font-mono text-xl leading-tight font-bold sm:text-2xl'>
               {formatMetricValue(metric.avg, row)}
             </span>
             <span className='pb-0.5 text-xs opacity-65'>{row.unit}</span>
@@ -190,7 +192,7 @@ function MetricRangeViz({ row, metric }) {
         }}
       >
         <div className='flex items-center justify-between gap-2'>
-          <div className='text-[10px] font-semibold uppercase tracking-wide opacity-60'>Range</div>
+          <div className='text-[10px] font-semibold tracking-wide uppercase opacity-60'>Range</div>
           <div className='text-right'>
             <div className='text-[10px] opacity-55'>Std Dev</div>
             <div className='font-mono text-xs'>{fmt(metric.stdDev, row.digits)}</div>
@@ -198,11 +200,13 @@ function MetricRangeViz({ row, metric }) {
         </div>
 
         <div className='mt-2 flex items-center gap-2'>
-          <div className='shrink-0 text-[11px] font-mono opacity-65'>{fmt(metric.min, row.digits)}</div>
+          <div className='shrink-0 font-mono text-[11px] opacity-65'>
+            {fmt(metric.min, row.digits)}
+          </div>
           <div className='relative h-5 min-w-0 flex-1'>
-            <div className='absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-base-content/20' />
-            <div className='absolute left-0 top-1/2 h-2 w-px -translate-y-1/2 bg-base-content/30' />
-            <div className='absolute right-0 top-1/2 h-2 w-px -translate-y-1/2 bg-base-content/30' />
+            <div className='bg-base-content/20 absolute top-1/2 right-0 left-0 h-px -translate-y-1/2' />
+            <div className='bg-base-content/30 absolute top-1/2 left-0 h-2 w-px -translate-y-1/2' />
+            <div className='bg-base-content/30 absolute top-1/2 right-0 h-2 w-px -translate-y-1/2' />
             {positions.hasRange && positions.stdWidth > 0 && (
               <div
                 className='absolute top-1/2 h-2 -translate-y-1/2 rounded-full'
@@ -226,7 +230,9 @@ function MetricRangeViz({ row, metric }) {
               }}
             />
           </div>
-          <div className='shrink-0 text-[11px] font-mono opacity-65'>{fmt(metric.max, row.digits)}</div>
+          <div className='shrink-0 font-mono text-[11px] opacity-65'>
+            {fmt(metric.max, row.digits)}
+          </div>
         </div>
       </div>
     </div>

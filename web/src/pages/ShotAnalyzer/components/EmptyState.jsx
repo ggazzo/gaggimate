@@ -60,9 +60,7 @@ export function EmptyState({ loading }) {
 
             <div className='flex-1'>
               {/* REMOVED HOVER EFFECT */}
-              <h3 className='text-base-content mb-1 text-sm font-bold'>
-                GaggiMate (GM)
-              </h3>
+              <h3 className='text-base-content mb-1 text-sm font-bold'>GaggiMate (GM)</h3>
               <p className='text-base-content text-xs leading-relaxed'>
                 Your saved shots and profiles directly from the GaggiMate internal storage.
               </p>
@@ -74,7 +72,7 @@ export function EmptyState({ loading }) {
 
           {/* VIEW Section */}
           <div className='flex items-start gap-4'>
-            <div className='flex h-8 w-10 flex-shrink-0 items-center justify-center text-base-content/45'>
+            <div className='text-base-content/45 flex h-8 w-10 flex-shrink-0 items-center justify-center'>
               <FontAwesomeIcon icon={faEye} className='text-lg' />
             </div>
 
@@ -122,7 +120,7 @@ export function EmptyState({ loading }) {
             </span>
             <span className='mt-1 block'>
               Use the status bar toggle to switch between{' '}
-              <span className='font-bold text-base-content'>View temporarily</span> and{' '}
+              <span className='text-base-content font-bold'>View temporarily</span> and{' '}
               <span className='font-bold' style={{ color: analyzerUiColors.sourceBadgeWebText }}>
                 Save to Browser
               </span>{' '}

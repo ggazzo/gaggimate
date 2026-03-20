@@ -146,11 +146,7 @@ export function buildExternalTooltipState({
   }
 
   const tooltipItems = Array.isArray(tooltip.dataPoints) ? tooltip.dataPoints : [];
-  const rows = buildExternalTooltipRows(
-    tooltipItems,
-    getHoverWaterValuesAtX,
-    tooltipColorByLabel,
-  );
+  const rows = buildExternalTooltipRows(tooltipItems, getHoverWaterValuesAtX, tooltipColorByLabel);
   const titleLines = Array.isArray(tooltip.title)
     ? tooltip.title.filter(title => typeof title === 'string' && title.trim().length > 0)
     : [];
@@ -204,7 +200,7 @@ export function ShotChartExternalTooltip({ tooltipRef, state, layout, isFullDisp
   return (
     <div
       ref={tooltipRef}
-      className={`shot-chart-tooltip${isFullDisplay ? ' shot-chart-tooltip--fullscreen' : ''}`}
+      className={`shot-chart-tooltip${isFullDisplay ? 'shot-chart-tooltip--fullscreen' : ''}`}
       style={{
         left: `${layout.x}px`,
         top: `${layout.y}px`,
@@ -225,7 +221,7 @@ export function ShotChartExternalTooltip({ tooltipRef, state, layout, isFullDisp
         return (
           <div
             key={`${row.label}-${row.valueText}-${index}`}
-            className={`shot-chart-tooltip__row${row.spacerBefore ? ' shot-chart-tooltip__row--spacer' : ''}`}
+            className={`shot-chart-tooltip__row${row.spacerBefore ? 'shot-chart-tooltip__row--spacer' : ''}`}
           >
             {rowIcon ? (
               <FontAwesomeIcon
