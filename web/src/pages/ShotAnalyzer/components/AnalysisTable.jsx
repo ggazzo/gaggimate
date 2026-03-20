@@ -26,8 +26,22 @@ import {
   faTimes,
   faCircleInfo,
 } from '@fortawesome/free-solid-svg-icons';
-import { columnConfig, groupColors, utilityColors, analyzerUiColors } from '../utils/analyzerUtils';
+import { columnConfig, utilityColors } from '../utils/analyzerUtils';
 import { ColumnControls } from './ColumnControls'; // Import ColumnControls
+import { getAnalyzerColumnVisual } from './analyzerGroupVisuals';
+import {
+  ANALYZER_COMPACT_GROUP_CLASSES,
+  ANALYZER_COMPACT_ICON_BUTTON_CLASS,
+  getAnalyzerIconButtonClasses,
+  getAnalyzerTextButtonClasses,
+  joinAnalyzerClasses,
+} from './analyzerControlStyles';
+
+const NEUTRAL_STATUS_BADGE_CLASS = 'bg-base-content/10 text-base-content/80 border-base-content/15';
+
+function getBrewModeLabel(isBrewByWeight) {
+  return isBrewByWeight ? 'Brew by Weight' : 'Brew by Time';
+}
 
 function StopCalculationHelpPopover() {
   const detailsRef = useRef(null);
@@ -87,34 +101,41 @@ function StopCalculationHelpPopover() {
   return (
     <details ref={detailsRef} className='dropdown'>
       <summary
-        className='text-base-content/45 hover:text-base-content/80 flex h-5 w-5 list-none items-center justify-center rounded-full transition-colors [&::-webkit-details-marker]:hidden'
+        className={joinAnalyzerClasses(
+          getAnalyzerIconButtonClasses({
+            className: 'h-5 w-5 rounded-full [&::-webkit-details-marker]:hidden',
+          }),
+          'list-none',
+        )}
         aria-label='Stop Calculation help'
         title='Stop Calculation help'
       >
         <FontAwesomeIcon icon={faCircleInfo} className='text-[13px]' />
       </summary>
       <div
-        className={`dropdown-content bg-base-100/95 border-base-content/10 text-base-content z-[90] max-h-[70vh] overflow-y-auto rounded-xl border p-3 text-[12px] leading-relaxed font-normal tracking-normal normal-case shadow-xl backdrop-blur-md ${
+        className={`dropdown-content bg-base-100/95 border-base-content/10 text-base-content normal-case tracking-normal z-[90] max-h-[70vh] overflow-y-auto rounded-xl border p-3 text-[12px] leading-relaxed font-normal shadow-xl backdrop-blur-md ${
           isWideViewport ? 'absolute right-0 bottom-full mb-2 w-[min(92vw,34rem)]' : ''
         }`}
         style={mobilePopoverStyle}
       >
         <div className='space-y-2.5'>
-          <p className='text-sm leading-tight font-semibold'>Stop Calculation (Analyzer only)</p>
+          <p className='text-sm font-semibold leading-tight'>Stop Calculation (Analyzer only)</p>
           <p className='opacity-85'>
             The <strong>Stop Calculation</strong> settings and{' '}
             <strong style={{ color: utilityColors.predictionInfoBlue }}>Calc</strong> values are
-            Analyzer-only tools. Future-value calculations are not performed by GaggiMate itself and
-            shot execution is not changed by these settings.
+            Analyzer-only tools. Future-value calculations are not performed by GaggiMate itself
+            and shot execution is not changed by these settings.
           </p>
 
-          <div className='bg-base-200/60 rounded-lg p-2'>
-            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
+          <div className='rounded-lg bg-base-200/60 p-2'>
+            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
               Status Labels
             </p>
             <div className='mt-1 space-y-1.5'>
               <p>
-                <span className='mr-1.5 inline-flex rounded-[4px] border border-sky-700 bg-sky-600 px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'>
+                <span
+                  className={`mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight align-middle ${NEUTRAL_STATUS_BADGE_CLASS}`}
+                >
                   REVIEW PHASE
                 </span>
                 Shown when a stop reason is only detected after a higher calculation step / deeper
@@ -123,7 +144,7 @@ function StopCalculationHelpPopover() {
               </p>
               <p>
                 <span
-                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'
+                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight text-white align-middle'
                   style={{
                     backgroundColor: utilityColors.warningOrange,
                     borderColor: utilityColors.warningOrange,
@@ -138,7 +159,7 @@ function StopCalculationHelpPopover() {
               </p>
               <p>
                 <span
-                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'
+                  className='mr-1.5 inline-flex rounded-[4px] border px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-tight text-white align-middle'
                   style={{
                     backgroundColor: utilityColors.warningOrange,
                     borderColor: utilityColors.warningOrange,
@@ -149,18 +170,11 @@ function StopCalculationHelpPopover() {
                 Shown when the scale briefly loses connection during the brew. In this case, weight
                 is ignored for stop detection for that brew, even if the scale reconnects later.
               </p>
-              <p>
-                <span className='mr-1.5 inline-flex rounded-[4px] border border-blue-700 bg-blue-600 px-1.5 py-0.5 align-middle text-[10px] leading-none font-bold tracking-tight text-white'>
-                  AUTO-CALC
-                </span>
-                Shown when Auto mode is active and the displayed stop-calculation delays are
-                analyzer-side averages from the phase-specific calculations.
-              </p>
             </div>
           </div>
 
-          <div className='bg-base-200/60 rounded-lg p-2'>
-            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
+          <div className='rounded-lg bg-base-200/60 p-2'>
+            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
               How stop detection works
             </p>
             <p>
@@ -187,8 +201,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='bg-base-200/60 rounded-lg p-2'>
-            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>Example</p>
+          <div className='rounded-lg bg-base-200/60 p-2'>
+            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>Example</p>
             <p>
               If a phase has a flow stop at <strong>1 ml/s</strong>, flow may briefly cross that
               threshold between two samples. A short calculation helps estimate the stop condition
@@ -196,8 +210,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='bg-base-200/60 rounded-lg p-2'>
-            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
+          <div className='rounded-lg bg-base-200/60 p-2'>
+            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
               Auto vs Manual
             </p>
             <p className='mt-1'>
@@ -214,8 +228,8 @@ function StopCalculationHelpPopover() {
             </p>
           </div>
 
-          <div className='bg-base-200/60 rounded-lg p-2'>
-            <p className='text-base-content/90 text-[12px] leading-tight font-semibold'>
+          <div className='rounded-lg bg-base-200/60 p-2'>
+            <p className='text-[12px] leading-tight font-semibold text-base-content/90'>
               Scale vs System
             </p>
             <p>
@@ -252,6 +266,11 @@ export function AnalysisTable({
   const visibleColumns = columnConfig.filter(col => activeColumns.has(col.id));
 
   // --- Helper Functions ---
+  const handleNonNegativeDelayInput = (key, rawValue) => {
+    const parsedValue = Number.parseInt(rawValue, 10);
+    if (Number.isNaN(parsedValue)) return;
+    onSettingsChange({ ...safeSettings, [key]: Math.max(0, parsedValue) });
+  };
 
   const scrollTable = amount => {
     if (tableContainerRef.current) {
@@ -328,12 +347,12 @@ export function AnalysisTable({
     let label = col.label;
     if (col.id === 'duration') label = 'Time';
     else if (col.id === 'water') label = 'Water';
-    else if (col.group === 'puckflow') label = 'P. Flow';
+    else if (col.group === 'puckflow') label = 'Puck Flow';
     else if (col.group === 'temp' || col.group === 'target_temp') label = '℃';
 
     if (col.type === 'se') label += ' S/E';
-    else if (col.type === 'mm') label += ' Range';
-    else if (col.type === 'avg') label += ' ∅';
+    else if (col.type === 'mm') label += ' Min/Max';
+    else if (col.type === 'avg') label += ' Avg ∅';
     return label;
   };
 
@@ -352,36 +371,20 @@ export function AnalysisTable({
         touchAction: 'pan-y',
       };
 
+  const subtleDividerClass = 'border-base-content/5';
+  const strongDividerClass = 'border-base-content/12 border-r-2';
+  const primaryTableTextClass = 'text-base-content/90 font-semibold';
+  const secondaryTableTextClass = 'text-base-content/65 font-medium';
+
   return (
-    <div className='mt-6 flex w-full flex-col'>
+    <div className='flex w-full flex-col'>
       {/* Inject CSS to hide Webkit Scrollbars */}
       <style>{`
                 .no-scrollbar::-webkit-scrollbar { display: none; }
             `}</style>
 
-      {/* 1. Status Badges (Outside the main card) - Updated for Solid Colors */}
+      {/* Keep the top strip focused on global warnings and phase-review hints only. */}
       <div className='mb-2 flex flex-wrap gap-2 px-1'>
-        {results.isBrewByWeight ? (
-          <StatusBadge
-            label='BREW BY WEIGHT'
-            colorClass='text-white shadow-sm'
-            style={{
-              backgroundColor: analyzerUiColors.brewByWeightLabelBg,
-              borderColor: analyzerUiColors.brewByWeightLabelBorder,
-              color: analyzerUiColors.brewByWeightLabelText,
-            }}
-          />
-        ) : (
-          <StatusBadge
-            label='BREW BY TIME'
-            colorClass='text-white shadow-sm'
-            style={{
-              backgroundColor: analyzerUiColors.brewByTimeLabelBg,
-              borderColor: analyzerUiColors.brewByTimeLabelBorder,
-              color: analyzerUiColors.brewByTimeLabelText,
-            }}
-          />
-        )}
         {results.globalScaleLost && (
           <StatusBadge
             label='SCALE LOST'
@@ -414,12 +417,12 @@ export function AnalysisTable({
                 ? `REVIEW PHASE ${results.delayReviewPhaseNumber}`
                 : 'PHASE REVIEW ADVISED'
             }
-            colorClass='bg-sky-600 text-white border-sky-700'
-            title={results.delayReviewMessage || 'Unusually high inferred delay detected.'}
+            colorClass={NEUTRAL_STATUS_BADGE_CLASS}
+            title={
+              results.delayReviewMessage ||
+              'Unusually high inferred delay detected.'
+            }
           />
-        )}
-        {results.isAutoAdjusted && (
-          <StatusBadge label='AUTO-CALC' colorClass='bg-blue-600 text-white border-blue-700' />
         )}
       </div>
 
@@ -434,7 +437,7 @@ export function AnalysisTable({
             // Navigation & Zoom Group Injected into ColumnControls Header
             <div className='flex items-center gap-2'>
               {/* Zoom Controls */}
-              <div className='bg-base-content/5 border-base-content/5 flex items-center gap-1 rounded border p-0.5'>
+              <div className={ANALYZER_COMPACT_GROUP_CLASSES}>
                 <ScrollBtn
                   icon={faMagnifyingGlassMinus}
                   onClick={() => handleZoom('out')}
@@ -452,8 +455,10 @@ export function AnalysisTable({
                 />
               </div>
 
+              <div className='bg-base-content/10 hidden h-3 w-px shrink-0 sm:block' aria-hidden='true' />
+
               {/* Scroll Controls */}
-              <div className='bg-base-content/5 border-base-content/5 flex hidden items-center gap-1 rounded border p-0.5 sm:flex'>
+              <div className={`${ANALYZER_COMPACT_GROUP_CLASSES} hidden sm:flex`}>
                 <ScrollBtn icon={faArrowLeft} onClick={() => scrollToBound('start')} />
                 <ScrollBtn icon={faAngleDoubleLeft} onClick={() => scrollTable(-300)} />
                 <ScrollBtn
@@ -486,25 +491,32 @@ export function AnalysisTable({
             style={{ fontSize: `${tableFontSize}px`, lineHeight: '1.4' }}
           >
             <thead>
-              <tr className='bg-base-200 border-base-content/10 border-b-2'>
-                <th className='bg-base-content/5 border-base-content/5 w-8 border-r py-2 text-center opacity-40'>
+              <tr className='border-base-content/10 border-b-2'>
+                <th
+                  className={`w-8 border-r py-2 text-center select-none ${subtleDividerClass} ${primaryTableTextClass}`}
+                >
                   #
                 </th>
-                <th className='bg-base-content/5 border-base-content/5 min-w-[120px] border-r px-2 py-2 text-left font-bold tracking-tighter whitespace-nowrap uppercase opacity-60'>
+                <th
+                  className={`min-w-[120px] px-2 py-2 text-left whitespace-nowrap ${strongDividerClass} ${primaryTableTextClass}`}
+                >
                   Phase
                 </th>
                 {visibleColumns.map(col => {
-                  const colors = groupColors[col.group] || groupColors.basics;
+                  const columnVisual = getAnalyzerColumnVisual(col);
                   return (
                     <th
                       key={col.id}
-                      className={`border-base-content/10 border-l px-3 py-2 text-right font-bold tracking-tighter whitespace-nowrap uppercase`}
-                      style={{
-                        borderTop: `3px solid ${colors.anchor}`,
-                        backgroundColor: 'rgba(128, 128, 128, 0.05)', // Subtle unified tint
-                      }}
+                      className={`border-l px-3 py-2 text-right align-middle ${subtleDividerClass} ${primaryTableTextClass}`}
                     >
-                      <span className={colors.text}>{getHeaderLabel(col)}</span>
+                      <span className='ml-auto flex max-w-[6.75rem] items-center justify-end gap-1.5 text-right leading-tight'>
+                        <FontAwesomeIcon
+                          icon={columnVisual.icon}
+                          className='shrink-0 text-[11px]'
+                          style={{ color: columnVisual.color }}
+                        />
+                        <span className='min-w-0 whitespace-normal break-words'>{getHeaderLabel(col)}</span>
+                      </span>
                     </th>
                   );
                 })}
@@ -517,27 +529,34 @@ export function AnalysisTable({
                   key={idx}
                   className='border-base-content/5 hover:bg-base-content/5 group border-b align-top transition-colors'
                 >
-                  <td className='bg-base-content/5 border-base-content/5 border-r pt-2.5 text-center font-bold opacity-20 select-none'>
+                  <td
+                    className={`border-r pt-2.5 text-center font-bold select-none ${subtleDividerClass} text-base-content/85`}
+                  >
                     {idx + 1}
                   </td>
-                  <td className='bg-base-content/5 border-base-content/5 border-r px-2 py-2 text-left whitespace-nowrap'>
-                    {/* Neutral Phase Names */}
-                    <div className='text-base-content mb-0.5 leading-none font-bold'>
+                  <td className={`px-2 py-2 text-left whitespace-nowrap ${strongDividerClass}`}>
+                    {/* Keep phase naming prominent and attach brew mode only to the last row. */}
+                    <div className='text-base-content mb-0.5 leading-none font-semibold'>
                       {phase.displayName}
                     </div>
                     {phase.exit?.reason && (
                       <div
-                        className='font-bold tracking-tight uppercase'
+                        className='font-semibold tracking-tight uppercase'
                         style={{ fontSize: '0.8em', color: utilityColors.stopRed }}
                       >
                         via {phase.exit.reason}
+                      </div>
+                    )}
+                    {idx === results.phases.length - 1 && (
+                      <div className='leading-tight font-medium text-base-content/55' style={{ fontSize: '0.8em' }}>
+                        {getBrewModeLabel(results.isBrewByWeight)}
                       </div>
                     )}
                   </td>
                   {visibleColumns.map(col => (
                     <td
                       key={col.id}
-                      className='border-base-content/5 border-l px-3 py-2 text-right font-mono whitespace-nowrap tabular-nums'
+                      className={`border-l px-3 py-2 text-right font-mono whitespace-nowrap tabular-nums ${subtleDividerClass}`}
                     >
                       <CellContent phase={phase} col={col} results={results} />
                     </td>
@@ -546,16 +565,16 @@ export function AnalysisTable({
               ))}
             </tbody>
 
-            <tfoot className='bg-base-200 border-base-content/10 text-base-content border-t-2 font-bold'>
+            <tfoot className='border-base-content/10 text-base-content border-t-2'>
               <tr>
-                <td className='bg-base-content/5 border-base-content/5 border-r'></td>
-                <td className='bg-base-content/5 border-base-content/5 border-r px-2 py-2 text-left tracking-wider uppercase opacity-60'>
+                <td className={`border-r ${subtleDividerClass}`}></td>
+                <td className={`px-2 py-2 text-left ${strongDividerClass} ${primaryTableTextClass}`}>
                   Total
                 </td>
                 {visibleColumns.map(col => (
                   <td
                     key={col.id}
-                    className='border-base-content/5 border-l px-3 py-2 text-right font-mono tabular-nums'
+                    className={`border-l px-3 py-2 text-right font-mono tabular-nums ${subtleDividerClass} ${primaryTableTextClass}`}
                   >
                     <CellContent phase={null} col={col} results={results} isTotal={true} />
                   </td>
@@ -566,15 +585,16 @@ export function AnalysisTable({
         </div>
 
         {/* C. New Footer: Delay Settings (Left) & Legend (Right) */}
-        <div className='bg-base-100 border-base-content/10 flex flex-col items-stretch gap-3 rounded-b-lg border-t px-4 py-3 text-[10px] font-bold tracking-wider uppercase sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'>
+        <div className='bg-base-100 border-base-content/10 flex flex-col items-stretch gap-3 rounded-b-lg border-t px-4 py-3 text-[10px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between'>
           {/* Left: Stop Calculation Inputs */}
           <div className='flex w-full flex-wrap items-center gap-x-3 gap-y-2 sm:w-auto sm:gap-4'>
-            <span className='hidden opacity-40 select-none sm:inline'>Stop Calculation</span>
+            <span className={`hidden select-none sm:inline ${secondaryTableTextClass}`}>Stop Calculation</span>
             <div className='flex flex-wrap items-center gap-2'>
               {/* Shows Average Symbol ∅ if auto-delay is active */}
-              <span className='opacity-60'>Scale{safeSettings.autoDelay ? ' ∅' : ''}</span>
+              <span className={secondaryTableTextClass}>Scale{safeSettings.autoDelay ? ' ∅' : ''}</span>
               <input
                 type='number'
+                min='0'
                 step='50'
                 value={
                   safeSettings.autoDelay && results?.usedSettings
@@ -582,20 +602,18 @@ export function AnalysisTable({
                     : safeSettings.scaleDelay
                 }
                 disabled={safeSettings.autoDelay}
-                onInput={e => {
-                  const val = parseInt(e.target.value);
-                  if (!isNaN(val)) onSettingsChange({ ...safeSettings, scaleDelay: val });
-                }}
+                onInput={e => handleNonNegativeDelayInput('scaleDelay', e.target.value)}
                 className='bg-base-200 border-base-content/10 focus:border-primary text-base-content h-5 w-12 rounded border text-center font-mono focus:outline-none disabled:opacity-30'
               />
-              <span className='font-normal lowercase opacity-40'>ms</span>
+              <span className='text-base-content/45 font-normal lowercase'>ms</span>
             </div>
             <div className='bg-base-content/10 mx-1 hidden h-3 w-px sm:block'></div>
             <div className='flex flex-wrap items-center gap-2'>
               {/* Shows Average Symbol ∅ if auto-delay is active */}
-              <span className='opacity-60'>System{safeSettings.autoDelay ? ' ∅' : ''}</span>
+              <span className={secondaryTableTextClass}>System{safeSettings.autoDelay ? ' ∅' : ''}</span>
               <input
                 type='number'
+                min='0'
                 step='50'
                 value={
                   safeSettings.autoDelay && results?.usedSettings
@@ -603,14 +621,15 @@ export function AnalysisTable({
                     : safeSettings.sensorDelay
                 }
                 disabled={safeSettings.autoDelay}
-                onInput={e => {
-                  const val = parseInt(e.target.value);
-                  if (!isNaN(val)) onSettingsChange({ ...safeSettings, sensorDelay: val });
-                }}
+                onInput={e => handleNonNegativeDelayInput('sensorDelay', e.target.value)}
                 className='bg-base-200 border-base-content/10 focus:border-primary text-base-content h-5 w-12 rounded border text-center font-mono focus:outline-none disabled:opacity-30'
               />
-              <span className='font-normal lowercase opacity-40'>ms</span>
-              <label className='hover:text-primary ml-2 flex cursor-pointer items-center gap-1.5 transition-colors'>
+              <span className='text-base-content/45 font-normal lowercase'>ms</span>
+              <label
+                className={getAnalyzerTextButtonClasses({
+                  className: 'ml-2 flex cursor-pointer items-center gap-1.5 px-1.5 py-0.5',
+                })}
+              >
                 <input
                   type='checkbox'
                   checked={safeSettings.autoDelay}
@@ -624,10 +643,10 @@ export function AnalysisTable({
           </div>
 
           {/* Right: Legend */}
-          <div className='text-base-content grid w-full grid-cols-3 gap-x-3 gap-y-1 font-bold select-none sm:flex sm:w-auto sm:items-center sm:gap-4'>
-            <span className='leading-tight whitespace-normal'>∅ Avg (Time Weighted)</span>
-            <span className='leading-tight whitespace-normal'>S/E Start/End</span>
-            <span className='leading-tight whitespace-normal'>Range Min/Max</span>
+          <div className='text-base-content grid w-full grid-cols-3 gap-x-3 gap-y-1 select-none sm:flex sm:w-auto sm:items-center sm:gap-4'>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>Avg (time weighted)</span>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>S/E Start/End</span>
+            <span className={`leading-tight whitespace-normal ${secondaryTableTextClass}`}>Range Min/Max</span>
           </div>
         </div>
       </div>
@@ -651,10 +670,10 @@ function CellContent({ phase, col, results, isTotal = false }) {
   // Helper for Boolean Status rendering
   const renderBool = val => {
     if (val === true) {
-      return <FontAwesomeIcon icon={faCheck} className='text-success text-[1em]' />;
+      return <FontAwesomeIcon icon={faCheck} className='text-[1em] text-success' />;
     }
     if (val === false) {
-      return <FontAwesomeIcon icon={faTimes} className='text-error text-[1em]' />;
+      return <FontAwesomeIcon icon={faTimes} className='text-[1em] text-error' />;
     }
     return <span className='text-base-content/60'>-</span>;
   };
@@ -819,7 +838,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
   if (isTotal) {
     if (isBoolean) return <div className='flex justify-end'>{booleanContent}</div>;
     return (
-      <span>
+      <span className='font-semibold text-base-content/90'>
         {mainValue}
         {unit}
       </span>
@@ -828,7 +847,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
 
   const isWeightCol = col.id === 'weight';
   const exitMatchesCol = isWeightCol
-    ? phase.exit?.type === 'weight' || phase.exit?.type === 'volumetric'
+    ? (phase.exit?.type === 'weight' || phase.exit?.type === 'volumetric')
     : phase.exit?.type === col.targetType;
   const isHit = exitMatchesCol;
 
@@ -902,7 +921,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
   if (col.targetType && phase.targetCalcValues) {
     const calcEntry =
       col.id === 'weight'
-        ? phase.targetCalcValues['volumetric'] || phase.targetCalcValues['weight']
+        ? (phase.targetCalcValues['volumetric'] || phase.targetCalcValues['weight'])
         : phase.targetCalcValues[col.targetType];
 
     if (calcEntry) {
@@ -991,7 +1010,7 @@ function CellContent({ phase, col, results, isTotal = false }) {
         </div>
       ) : (
         <span
-          className={isHit ? 'font-bold' : ''}
+          className={isHit ? 'font-semibold' : 'font-medium text-base-content/85'}
           style={isHit ? { color: utilityColors.stopRed } : {}}
         >
           {mainValue}
@@ -1021,7 +1040,9 @@ const ScrollBtn = ({ icon, onClick, className = '', title }) => (
   <button
     onClick={onClick}
     title={title}
-    className={`btn btn-ghost btn-xs text-base-content/40 hover:text-primary h-5 min-h-0 px-1.5 ${className}`}
+    className={getAnalyzerIconButtonClasses({
+      className: `btn btn-ghost btn-xs ${ANALYZER_COMPACT_ICON_BUTTON_CLASS} px-0 ${className}`,
+    })}
   >
     <FontAwesomeIcon icon={icon} className='text-[10px]' />
   </button>

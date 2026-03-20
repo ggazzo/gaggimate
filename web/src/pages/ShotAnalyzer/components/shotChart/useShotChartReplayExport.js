@@ -344,8 +344,7 @@ export function useShotChartReplayExport({
     const runtime = replayRuntimeRef.current;
     const mainChart = getMainChart();
     const tempChart = getTempChart();
-    if (!runtime || !Array.isArray(runtime.sampleTimesSec) || runtime.sampleTimesSec.length === 0)
-      return;
+    if (!runtime || !Array.isArray(runtime.sampleTimesSec) || runtime.sampleTimesSec.length === 0) return;
     if (!mainChart || !tempChart) return;
 
     // Starting from frame -1 clears all replay datasets before the first visible
@@ -384,8 +383,7 @@ export function useShotChartReplayExport({
 
   const resumeReplay = () => {
     const runtime = replayRuntimeRef.current;
-    if (!runtime || !Array.isArray(runtime.sampleTimesSec) || runtime.sampleTimesSec.length === 0)
-      return;
+    if (!runtime || !Array.isArray(runtime.sampleTimesSec) || runtime.sampleTimesSec.length === 0) return;
     if (isReplayingRef.current) return;
 
     isReplayingRef.current = true;
@@ -589,7 +587,11 @@ export function useShotChartReplayExport({
       setReplayExportStatusSafely({ status: 'downloading', error: null });
       downloadBlob(
         blob,
-        buildReplayExportFilename(shotData, exportConfig.includeLegend, exportConfig.exportFormat),
+        buildReplayExportFilename(
+          shotData,
+          exportConfig.includeLegend,
+          exportConfig.exportFormat,
+        ),
       );
       restoreReplayVisualSnapshot(visualSnapshot);
       setReplayExportStatusSafely({ status: 'idle', error: null });
@@ -835,7 +837,11 @@ export function useShotChartReplayExport({
         exportFormat: nextExportFormat,
       };
     });
-  }, [hasVideoExportSupport, shouldForceWebmExport, videoExportCapabilities.shouldHideWebmOption]);
+  }, [
+    hasVideoExportSupport,
+    shouldForceWebmExport,
+    videoExportCapabilities.shouldHideWebmOption,
+  ]);
 
   return {
     replayRuntimeRef,

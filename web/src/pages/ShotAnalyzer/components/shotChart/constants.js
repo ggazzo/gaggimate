@@ -92,7 +92,10 @@ export const LEGEND_THIN_LINE_LABELS = new Set([
   'Weight Flow',
 ]);
 
-export const TOOLTIP_WATER_LABELS = new Set([WATER_DRAWN_PHASE_LABEL, WATER_DRAWN_TOTAL_LABEL]);
+export const TOOLTIP_WATER_LABELS = new Set([
+  WATER_DRAWN_PHASE_LABEL,
+  WATER_DRAWN_TOTAL_LABEL,
+]);
 export const TOOLTIP_BOTTOM_LABELS = new Set(['Temp', 'Target T']);
 
 export const LEGEND_ORDER = [

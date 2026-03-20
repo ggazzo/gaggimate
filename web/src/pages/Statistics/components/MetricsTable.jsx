@@ -9,10 +9,6 @@ import { faScaleBalanced } from '@fortawesome/free-solid-svg-icons/faScaleBalanc
 import { faTemperatureHalf } from '@fortawesome/free-solid-svg-icons/faTemperatureHalf';
 import { fmt } from '../utils/format';
 
-const DETAILED_TABLE_AVERAGE_HELPER_ID = 'statistics-metrics-average-helper';
-const DETAILED_TABLE_AVERAGE_HELPER_TEXT =
-  'Avg semantics: Pressure, Flow, Puck Flow and Temperature are time-weighted; Weight, Water, Duration and Target Temp Δ are shot-level averages.';
-
 const METRIC_ROWS = [
   {
     key: 'w',
@@ -165,24 +161,20 @@ function MetricRangeViz({ row, metric }) {
     >
       <div className='flex items-center gap-3'>
         <div
-          className='flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border sm:h-14 sm:w-14'
+          className='flex h-12 w-12 shrink-0 items-center justify-center sm:h-14 sm:w-14'
           style={{
             color: row.accentColor,
-            borderColor: `color-mix(in srgb, ${row.accentColor} 32%, var(--statistics-summary-border))`,
-            background: `color-mix(in srgb, ${row.accentColor} 10%, transparent)`,
           }}
         >
           <FontAwesomeIcon icon={row.icon} className='text-2xl sm:text-[1.65rem]' />
         </div>
 
         <div className='min-w-0 flex-1'>
-          <div
-            className={`truncate text-[10px] font-semibold tracking-wide uppercase ${row.colorClass}`}
-          >
+          <div className={`truncate text-[10px] font-semibold uppercase tracking-wide ${row.colorClass}`}>
             {row.label}
           </div>
           <div className='mt-1 flex items-end gap-1.5'>
-            <span className='truncate font-mono text-xl leading-tight font-bold sm:text-2xl'>
+            <span className='truncate font-mono text-xl font-bold leading-tight sm:text-2xl'>
               {formatMetricValue(metric.avg, row)}
             </span>
             <span className='pb-0.5 text-xs opacity-65'>{row.unit}</span>
@@ -198,7 +190,7 @@ function MetricRangeViz({ row, metric }) {
         }}
       >
         <div className='flex items-center justify-between gap-2'>
-          <div className='text-[10px] font-semibold tracking-wide uppercase opacity-60'>Range</div>
+          <div className='text-[10px] font-semibold uppercase tracking-wide opacity-60'>Range</div>
           <div className='text-right'>
             <div className='text-[10px] opacity-55'>Std Dev</div>
             <div className='font-mono text-xs'>{fmt(metric.stdDev, row.digits)}</div>
@@ -206,13 +198,11 @@ function MetricRangeViz({ row, metric }) {
         </div>
 
         <div className='mt-2 flex items-center gap-2'>
-          <div className='shrink-0 font-mono text-[11px] opacity-65'>
-            {fmt(metric.min, row.digits)}
-          </div>
+          <div className='shrink-0 text-[11px] font-mono opacity-65'>{fmt(metric.min, row.digits)}</div>
           <div className='relative h-5 min-w-0 flex-1'>
-            <div className='bg-base-content/20 absolute top-1/2 right-0 left-0 h-px -translate-y-1/2' />
-            <div className='bg-base-content/30 absolute top-1/2 left-0 h-2 w-px -translate-y-1/2' />
-            <div className='bg-base-content/30 absolute top-1/2 right-0 h-2 w-px -translate-y-1/2' />
+            <div className='absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-base-content/20' />
+            <div className='absolute left-0 top-1/2 h-2 w-px -translate-y-1/2 bg-base-content/30' />
+            <div className='absolute right-0 top-1/2 h-2 w-px -translate-y-1/2 bg-base-content/30' />
             {positions.hasRange && positions.stdWidth > 0 && (
               <div
                 className='absolute top-1/2 h-2 -translate-y-1/2 rounded-full'
@@ -236,9 +226,7 @@ function MetricRangeViz({ row, metric }) {
               }}
             />
           </div>
-          <div className='shrink-0 font-mono text-[11px] opacity-65'>
-            {fmt(metric.max, row.digits)}
-          </div>
+          <div className='shrink-0 text-[11px] font-mono opacity-65'>{fmt(metric.max, row.digits)}</div>
         </div>
       </div>
     </div>
@@ -248,64 +236,20 @@ function MetricRangeViz({ row, metric }) {
 export function MetricsTable({ metrics }) {
   if (!metrics || Object.keys(metrics).length === 0) return null;
 
+  const metricCardRows = [
+    ...METRIC_ROWS.filter(row => row.key === 't'),
+    ...METRIC_ROWS.filter(row => row.key !== 't'),
+  ];
+
   return (
     <div>
-      <h3 className='mb-2 text-sm font-bold uppercase opacity-70'>Global Metric Averages</h3>
       <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
-        {METRIC_ROWS.map(row => {
+        {metricCardRows.map(row => {
           const metric = metrics[row.key];
           if (!metric) return null;
           return <MetricRangeViz key={row.key} row={row} metric={metric} />;
         })}
       </div>
-
-      <details className='border-base-content/10 bg-base-100/30 mt-3 rounded-xl border'>
-        <summary className='cursor-pointer list-none px-3 py-2 text-xs font-semibold tracking-wide uppercase opacity-70'>
-          Detailed Table
-        </summary>
-        <div className='border-base-content/10 border-t px-2 py-2'>
-          <p id={DETAILED_TABLE_AVERAGE_HELPER_ID} className='px-1 pb-2 text-[11px] opacity-65'>
-            {DETAILED_TABLE_AVERAGE_HELPER_TEXT}
-          </p>
-          <div className='overflow-x-auto'>
-            <table className='table-xs table w-full'>
-              <thead>
-                <tr className='text-xs opacity-60'>
-                  <th>Metric</th>
-                  <th className='text-right' aria-describedby={DETAILED_TABLE_AVERAGE_HELPER_ID}>
-                    Avg
-                  </th>
-                  <th className='text-right'>Min</th>
-                  <th className='text-right'>Max</th>
-                  <th className='text-right'>Std Dev</th>
-                </tr>
-              </thead>
-              <tbody>
-                {METRIC_ROWS.map(row => {
-                  const metric = metrics[row.key];
-                  if (!metric) return null;
-                  return (
-                    <tr key={row.key}>
-                      <td className={`font-semibold ${row.colorClass}`}>
-                        {row.label} <span className='opacity-50'>({row.unit})</span>
-                      </td>
-                      <td
-                        className='text-right font-mono'
-                        aria-label={`${row.label} average. ${row.averageDescription}`}
-                      >
-                        {formatMetricValue(metric.avg, row)}
-                      </td>
-                      <td className='text-right font-mono'>{fmt(metric.min, row.digits)}</td>
-                      <td className='text-right font-mono'>{fmt(metric.max, row.digits)}</td>
-                      <td className='text-right font-mono'>{fmt(metric.stdDev, row.digits)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </details>
     </div>
   );
 }

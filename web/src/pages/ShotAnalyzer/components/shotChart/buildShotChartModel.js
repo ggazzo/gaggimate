@@ -57,12 +57,7 @@ function buildSampleTimeline(samples) {
   };
 }
 
-function buildPhaseHoverRanges(
-  results,
-  shotStartSec,
-  sampleTimesSec,
-  cumulativeWaterTotalBySample,
-) {
+function buildPhaseHoverRanges(results, shotStartSec, sampleTimesSec, cumulativeWaterTotalBySample) {
   if (!Array.isArray(results?.phases)) return [];
 
   // Cache absolute phase windows once so hover lookups can resolve "phase water"
@@ -149,27 +144,15 @@ function buildAxisRanges(series) {
     ...series.targetFlow,
     ...series.weightFlow,
   ];
-  const mainAxisMaxRaw = safeMax(
-    mainAxisSamples.map(point => point.y),
-    1,
-  );
+  const mainAxisMaxRaw = safeMax(mainAxisSamples.map(point => point.y), 1);
   const mainAxisMax = Math.max(1, mainAxisMaxRaw * 1.02);
 
-  const weightAxisMaxRaw = safeMax(
-    series.weight.map(point => point.y),
-    1,
-  );
+  const weightAxisMaxRaw = safeMax(series.weight.map(point => point.y), 1);
   const weightAxisMax = Math.max(1, weightAxisMaxRaw * 1.02);
 
   const tempAxisSamples = [...series.temp, ...series.targetTemp];
-  const tempMinRaw = safeMin(
-    tempAxisSamples.map(point => point.y),
-    80,
-  );
-  const tempMaxRaw = safeMax(
-    tempAxisSamples.map(point => point.y),
-    100,
-  );
+  const tempMinRaw = safeMin(tempAxisSamples.map(point => point.y), 80);
+  const tempMaxRaw = safeMax(tempAxisSamples.map(point => point.y), 100);
   const tempRange = Math.max(0.5, tempMaxRaw - tempMinRaw);
   const tempTopPadding = Math.max(0.15, tempRange * 0.02);
   const tempBottomPadding = Math.max(0.25, tempRange * 0.07);
@@ -290,9 +273,7 @@ function buildPhaseAnnotations({
         const isFinalWeightStop =
           lastPhase.exit.type === 'weight' || lastPhase.exit.type === 'volumetric';
         if (isFinalWeightStop) {
-          const lastNonExtendedSample = samples.findLast(
-            sample => !sample.systemInfo?.extendedRecording,
-          );
+          const lastNonExtendedSample = samples.findLast(sample => !sample.systemInfo?.extendedRecording);
           if (lastNonExtendedSample) {
             finalStopTime = (lastNonExtendedSample.t || 0) / 1000;
           }
@@ -400,11 +381,7 @@ function createHoverWaterValueGetter({
   };
 }
 
-function buildWaterTooltipSeries(
-  sampleTimesSec,
-  cumulativeWaterTotalBySample,
-  getHoverWaterValuesAtX,
-) {
+function buildWaterTooltipSeries(sampleTimesSec, cumulativeWaterTotalBySample, getHoverWaterValuesAtX) {
   return {
     // These hidden overlay datasets exist only so Chart.js can expose water values
     // through the shared tooltip pipeline without drawing extra visible series.
@@ -421,7 +398,13 @@ function buildWaterTooltipSeries(
   };
 }
 
-export function buildShotChartModel({ shotData, results, visibility, colors, brewModeMeta }) {
+export function buildShotChartModel({
+  shotData,
+  results,
+  visibility,
+  colors,
+  brewModeMeta,
+}) {
   const samples = Array.isArray(shotData?.samples) ? shotData.samples : [];
   const { maxTime, shotStartSec, sampleTimesSec, cumulativeWaterTotalBySample } =
     buildSampleTimeline(samples);

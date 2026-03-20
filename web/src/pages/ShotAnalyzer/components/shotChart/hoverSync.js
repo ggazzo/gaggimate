@@ -113,7 +113,10 @@ export function attachTempChartLayoutSync({ mainChart, tempChart }) {
     const currentLeft = Number(currentPadding.left) || 0;
     const currentRight = Number(currentPadding.right) || 0;
 
-    if (Math.abs(currentLeft - leftPadding) < 0.5 && Math.abs(currentRight - rightPadding) < 0.5) {
+    if (
+      Math.abs(currentLeft - leftPadding) < 0.5 &&
+      Math.abs(currentRight - rightPadding) < 0.5
+    ) {
       return;
     }
 
@@ -188,7 +191,8 @@ export function attachShotChartHoverSync({
     const areaRect = hoverArea.getBoundingClientRect();
     const verticalTolerance = 20;
     const withinVerticalTolerance =
-      clientY >= areaRect.top - verticalTolerance && clientY <= areaRect.bottom + verticalTolerance;
+      clientY >= areaRect.top - verticalTolerance &&
+      clientY <= areaRect.bottom + verticalTolerance;
     if (!withinVerticalTolerance) {
       clearAllHover();
       return;

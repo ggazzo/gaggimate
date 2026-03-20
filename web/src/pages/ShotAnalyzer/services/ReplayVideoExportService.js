@@ -42,13 +42,10 @@ function wait(ms, signal) {
       window.clearTimeout(timerId);
       reject(new DOMException('Replay export aborted.', 'AbortError'));
     };
-    const timerId = window.setTimeout(
-      () => {
-        signal?.removeEventListener('abort', handleAbort);
-        resolve();
-      },
-      Math.max(0, ms),
-    );
+    const timerId = window.setTimeout(() => {
+      signal?.removeEventListener('abort', handleAbort);
+      resolve();
+    }, Math.max(0, ms));
 
     signal?.addEventListener('abort', handleAbort, { once: true });
   });
@@ -89,7 +86,10 @@ function getExportThemeColors() {
     pageBackground: readCssVar('--color-base-100', '#ffffff'),
     pageText: readCssVar('--color-base-content', '#0f172a'),
     surface: readCssVar('--statistics-summary-surface-muted', 'rgba(255, 255, 255, 0.96)'),
-    surfaceStrong: readCssVar('--statistics-summary-surface-strong', 'rgba(255, 255, 255, 0.985)'),
+    surfaceStrong: readCssVar(
+      '--statistics-summary-surface-strong',
+      'rgba(255, 255, 255, 0.985)',
+    ),
     border: readCssVar('--statistics-summary-border', 'rgba(15, 23, 42, 0.08)'),
     shadow: readCssVar('--statistics-summary-shadow', 'rgba(15, 23, 42, 0.12)'),
   };
@@ -144,8 +144,7 @@ function measureLegendRows(ctx, legendItems, maxWidth) {
     const textWidth = ctx.measureText(item.label).width;
     const swatchWidth = item.style === 'block' ? 18 : 22;
     const itemWidth = swatchWidth + EXPORT_LEGEND_GAP + textWidth;
-    const nextWidth =
-      currentRow.length === 0 ? itemWidth : currentWidth + EXPORT_LEGEND_ITEM_GAP + itemWidth;
+    const nextWidth = currentRow.length === 0 ? itemWidth : currentWidth + EXPORT_LEGEND_ITEM_GAP + itemWidth;
 
     if (currentRow.length > 0 && nextWidth > maxWidth) {
       rows.push(currentRow);
@@ -219,13 +218,7 @@ function getOverlayCanvasSize(layoutPreset, chartStackSize) {
   };
 }
 
-function resolveChartFrame({
-  layoutPreset,
-  chartPlacement,
-  outputWidth,
-  outputHeight,
-  chartStackSize,
-}) {
+function resolveChartFrame({ layoutPreset, chartPlacement, outputWidth, outputHeight, chartStackSize }) {
   if (layoutPreset === 'chart_native') {
     return {
       x: EXPORT_PADDING,
@@ -279,7 +272,8 @@ function resolveCompositionLayout({ config, mainCanvas, tempCanvas, legendItems 
     const measurementCtx = measurementCanvas.getContext('2d');
     if (measurementCtx) {
       measurementCtx.font = '600 14px Montserrat, sans-serif';
-      const maxLegendWidth = baseCanvasSize.width - EXPORT_PADDING * 2 - EXPORT_CARD_PADDING * 2;
+      const maxLegendWidth =
+        baseCanvasSize.width - EXPORT_PADDING * 2 - EXPORT_CARD_PADDING * 2;
       const legendRows = measureLegendRows(measurementCtx, legendItems, maxLegendWidth);
       legendSectionHeight =
         EXPORT_CARD_PADDING * 2 +
@@ -310,8 +304,7 @@ function resolveCompositionLayout({ config, mainCanvas, tempCanvas, legendItems 
       EXPORT_CARD_PADDING * 2 -
       (config.includeLegend && legendItems.length > 0 && config.layoutPreset === 'chart_native'
         ? legendSectionHeight
-        : 0)) /
-      chartStackSize.height,
+        : 0)) / chartStackSize.height,
   );
   const scaledMainWidth = Math.round(mainCanvas.width * chartScale);
   const scaledMainHeight = Math.round(mainCanvas.height * chartScale);
@@ -447,12 +440,10 @@ function resolveRecorderMimeType(targetFormat) {
       ? ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=h264', 'video/mp4']
       : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
 
-  return (
-    candidates.find(mimeType => {
-      if (typeof window.MediaRecorder.isTypeSupported !== 'function') return true;
-      return window.MediaRecorder.isTypeSupported(mimeType);
-    }) || null
-  );
+  return candidates.find(mimeType => {
+    if (typeof window.MediaRecorder.isTypeSupported !== 'function') return true;
+    return window.MediaRecorder.isTypeSupported(mimeType);
+  }) || null;
 }
 
 export function getVideoExportCapabilities() {
@@ -592,12 +583,9 @@ export async function exportReplayVideo({
   );
   const totalFrames = Math.max(
     1,
-    Number.isFinite(runtime.frameCount)
-      ? runtime.frameCount
-      : Math.ceil(totalDurationSec * EXPORT_FPS),
+    Number.isFinite(runtime.frameCount) ? runtime.frameCount : Math.ceil(totalDurationSec * EXPORT_FPS),
   );
-  const frameDurationMs =
-    totalDurationSec > 0 ? (totalDurationSec * 1000) / totalFrames : 1000 / EXPORT_FPS;
+  const frameDurationMs = totalDurationSec > 0 ? (totalDurationSec * 1000) / totalFrames : 1000 / EXPORT_FPS;
 
   const renderFrames = async () => {
     // Use an absolute schedule instead of chaining rAF + timeout delays.

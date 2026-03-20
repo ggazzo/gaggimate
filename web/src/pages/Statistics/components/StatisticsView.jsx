@@ -10,6 +10,7 @@ import { MetricsTable } from './MetricsTable';
 import { ProfileGroupTable } from './ProfileGroupTable';
 import { PhaseStatistics } from './PhaseStatistics';
 import { TrendChart } from './TrendChart';
+import { STATISTICS_SECTION_TITLE_CLASS } from './statisticsUi';
 import {
   buildShotCandidatePredicate,
   parseStatisticsQuery,
@@ -22,6 +23,7 @@ import { STATISTICS_SOURCE_FALLBACK } from '../utils/statisticsRoute';
 const BATCH_SIZE = 5;
 const DEFAULT_SETTINGS = { scaleDelayMs: 200, sensorDelayMs: 200, isAutoAdjusted: true };
 const NO_PROFILE_LOADED = 'No Profile Loaded';
+const STATISTICS_PANEL_CLASS = 'bg-base-100 border-base-content/10 rounded-xl border shadow-sm';
 
 function getStatisticsFallbackSource(source) {
   return STATISTICS_SOURCE_FALLBACK[source] || null;
@@ -123,9 +125,7 @@ function formatShotDateTime(ms) {
 }
 
 function getShotDisplayPrimary(shotMeta) {
-  return String(
-    shotMeta?.name || shotMeta?.label || shotMeta?.title || shotMeta?.id || 'Unknown Shot',
-  );
+  return String(shotMeta?.name || shotMeta?.label || shotMeta?.title || shotMeta?.id || 'Unknown Shot');
 }
 
 function stripFileExtension(value) {
@@ -154,6 +154,88 @@ function buildShotSelectionItem(shot, dateBasisMode) {
     secondary: getShotDisplaySecondary(shot, dateBasisMode),
     searchText: `${shot?.id || ''} ${shot?.profile || ''} ${shot?.name || ''} ${shot?.source || ''}`,
   };
+}
+
+function getPreferredStatisticsDetailSection(runMode) {
+  return runMode === 'profile' ? 'phase' : 'profile';
+}
+
+function resolveStatisticsDetailSectionChoice({
+  candidate,
+  hasProfileGroupStatistics,
+  hasPhaseStatistics,
+}) {
+  if (candidate === 'phase' && !hasPhaseStatistics && hasProfileGroupStatistics) return 'profile';
+  if (candidate === 'profile' && !hasProfileGroupStatistics && hasPhaseStatistics) return 'phase';
+  return candidate;
+}
+
+function StatisticsDetailHeader({
+  hasPhaseStatistics,
+  hasProfileGroupStatistics,
+  resolvedStatisticsDetailSection,
+  setStatisticsDetailSection,
+}) {
+  if (hasProfileGroupStatistics && hasPhaseStatistics) {
+    return (
+      <div role='tablist' className='tabs tabs-border'>
+        <button
+          type='button'
+          role='tab'
+          className={`tab ${resolvedStatisticsDetailSection === 'profile' ? 'tab-active' : ''}`}
+          aria-selected={resolvedStatisticsDetailSection === 'profile'}
+          onClick={() => setStatisticsDetailSection('profile')}
+        >
+          Per-profile statistics
+        </button>
+        <button
+          type='button'
+          role='tab'
+          className={`tab ${resolvedStatisticsDetailSection === 'phase' ? 'tab-active' : ''}`}
+          aria-selected={resolvedStatisticsDetailSection === 'phase'}
+          onClick={() => setStatisticsDetailSection('phase')}
+        >
+          Per-phase statistics
+        </button>
+      </div>
+    );
+  }
+
+  const title = hasProfileGroupStatistics ? 'Per-profile statistics' : 'Per-phase statistics';
+  return <h3 className={STATISTICS_SECTION_TITLE_CLASS}>{title}</h3>;
+}
+
+function StatisticsDetailSectionPanel({
+  hasPhaseStatistics,
+  hasProfileGroupStatistics,
+  resolvedStatisticsDetailSection,
+  result,
+  setStatisticsDetailSection,
+}) {
+  if (!hasProfileGroupStatistics && !hasPhaseStatistics) return null;
+
+  return (
+    <div className='space-y-2'>
+      <StatisticsDetailHeader
+        hasPhaseStatistics={hasPhaseStatistics}
+        hasProfileGroupStatistics={hasProfileGroupStatistics}
+        resolvedStatisticsDetailSection={resolvedStatisticsDetailSection}
+        setStatisticsDetailSection={setStatisticsDetailSection}
+      />
+
+      <div className={`${STATISTICS_PANEL_CLASS} p-4`}>
+        {hasProfileGroupStatistics &&
+          (!hasPhaseStatistics || resolvedStatisticsDetailSection === 'profile') && (
+            <ProfileGroupTable profileGroups={result.profileGroups} showTitle={false} />
+          )}
+
+        {hasPhaseStatistics &&
+          (!hasProfileGroupStatistics || resolvedStatisticsDetailSection === 'phase') && (
+            <PhaseStatistics phaseStats={result.phaseStats} showTitle={false} />
+          )}
+      </div>
+    </div>
+  );
 }
 
 export function StatisticsView({ initialContext }) {
@@ -192,6 +274,7 @@ export function StatisticsView({ initialContext }) {
   const [runRequest, setRunRequest] = useState(null);
   const [calcMode, setCalcMode] = useState(false);
   const [preparingRun, setPreparingRun] = useState(false);
+  const [statisticsDetailSection, setStatisticsDetailSection] = useState('profile');
 
   const metaLoadIdRef = useRef(0);
   const analyzeLoadIdRef = useRef(0);
@@ -200,6 +283,7 @@ export function StatisticsView({ initialContext }) {
   const initialProfilePresetAppliedRef = useRef(false);
   const profileModeShotSeedSignatureRef = useRef('');
   const gmPrefillRetryCountRef = useRef(0);
+  const initializedDetailSectionRunIdRef = useRef(null);
 
   useEffect(() => {
     libraryService.setApiService(apiService);
@@ -345,9 +429,7 @@ export function StatisticsView({ initialContext }) {
         : next;
     });
 
-    const validShotKeys = new Set(
-      (rawShotCandidates || []).map(getShotSelectionKey).filter(Boolean),
-    );
+    const validShotKeys = new Set((rawShotCandidates || []).map(getShotSelectionKey).filter(Boolean));
     setSelectedShotKeys(prev => {
       const next = prev.filter(id => validShotKeys.has(id));
       return next.length === prev.length && next.every((value, index) => value === prev[index])
@@ -389,14 +471,7 @@ export function StatisticsView({ initialContext }) {
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [
-    source,
-    initialProfileName,
-    metadataLoaded,
-    metadataLoading,
-    metadataError,
-    availableProfiles,
-  ]);
+  }, [source, initialProfileName, metadataLoaded, metadataLoading, metadataError, availableProfiles]);
 
   const parsedDslQuery = useMemo(() => parseStatisticsQuery(query), [query]);
 
@@ -465,7 +540,13 @@ export function StatisticsView({ initialContext }) {
       parseErrors,
       parseWarnings,
     };
-  }, [compiledDslFilter, dateBasisMode, rawShotCandidates, visualDateFrom, visualDateTo]);
+  }, [
+    compiledDslFilter,
+    dateBasisMode,
+    rawShotCandidates,
+    visualDateFrom,
+    visualDateTo,
+  ]);
 
   const hasBaseParseErrors = baseFilterState.parseErrors.length > 0;
   const selectionScopeShots = useMemo(
@@ -523,18 +604,12 @@ export function StatisticsView({ initialContext }) {
   );
 
   const baseShotSelectionItems = useMemo(
-    () =>
-      (selectionScopeShots || [])
-        .map(shot => buildShotSelectionItem(shot, dateBasisMode))
-        .filter(item => item.id),
+    () => (selectionScopeShots || []).map(shot => buildShotSelectionItem(shot, dateBasisMode)).filter(item => item.id),
     [selectionScopeShots, dateBasisMode],
   );
 
   const selectedProfileNormalizedSet = useMemo(
-    () =>
-      new Set(
-        (selectedProfileNames || []).map(name => cleanName(name).toLowerCase()).filter(Boolean),
-      ),
+    () => new Set((selectedProfileNames || []).map(name => cleanName(name).toLowerCase()).filter(Boolean)),
     [selectedProfileNames],
   );
 
@@ -560,14 +635,14 @@ export function StatisticsView({ initialContext }) {
   );
 
   const byProfileShotSelectionItems = useMemo(
-    () =>
-      byProfileEligibleShots
-        .map(shot => buildShotSelectionItem(shot, dateBasisMode))
-        .filter(item => item.id),
+    () => byProfileEligibleShots.map(shot => buildShotSelectionItem(shot, dateBasisMode)).filter(item => item.id),
     [byProfileEligibleShots, dateBasisMode],
   );
 
-  const selectedShotKeySet = useMemo(() => new Set(selectedShotKeys || []), [selectedShotKeys]);
+  const selectedShotKeySet = useMemo(
+    () => new Set(selectedShotKeys || []),
+    [selectedShotKeys],
+  );
 
   const derivedProfilesFromSelectedShots = useMemo(() => {
     const selectedProfileSet = new Set();
@@ -580,18 +655,11 @@ export function StatisticsView({ initialContext }) {
     return visibleProfileSelectionItems
       .map(item => item.id)
       .filter(profileName => selectedProfileSet.has(profileName));
-  }, [
-    selectionScopeShots,
-    selectedShotKeySet,
-    shotKeyToCanonicalProfile,
-    visibleProfileSelectionItems,
-  ]);
+  }, [selectionScopeShots, selectedShotKeySet, shotKeyToCanonicalProfile, visibleProfileSelectionItems]);
 
   const profileSelectionItems = visibleProfileSelectionItems;
-  const shotSelectionItems =
-    mode === 'profile' ? byProfileShotSelectionItems : baseShotSelectionItems;
-  const displayedProfileSelection =
-    mode === 'shots' ? derivedProfilesFromSelectedShots : selectedProfileNames;
+  const shotSelectionItems = mode === 'profile' ? byProfileShotSelectionItems : baseShotSelectionItems;
+  const displayedProfileSelection = mode === 'shots' ? derivedProfilesFromSelectedShots : selectedProfileNames;
 
   // Stage 2 filtering: apply mode-specific profile/shot selections on top of the base filter.
   const candidateFilterState = useMemo(() => {
@@ -625,9 +693,7 @@ export function StatisticsView({ initialContext }) {
       };
     }
 
-    const selectedProfileSet = new Set(
-      selectedProfileNames.map(name => cleanName(name).toLowerCase()),
-    );
+    const selectedProfileSet = new Set(selectedProfileNames.map(name => cleanName(name).toLowerCase()));
     const selectedShotKeySetLocal = new Set(selectedShotKeys);
 
     const filteredShots = (baseFilterState.filteredShots || []).filter(shot => {
@@ -680,15 +746,14 @@ export function StatisticsView({ initialContext }) {
   }, [candidateFilterState.filteredShots, dateBasisMode, dateFromLocal, dateToLocal]);
 
   // Preserve the original metadata order when rebuilding a selection set.
-  const orderShotSelection = nextSet => rawShotKeyOrder.filter(key => nextSet.has(key));
+  const orderShotSelection = nextSet =>
+    rawShotKeyOrder.filter(key => nextSet.has(key));
 
   const handleProfileSelectionChange = nextProfileNames => {
     const nextProfiles = Array.isArray(nextProfileNames) ? nextProfileNames : [];
     setSelectedProfileNames(nextProfiles);
 
-    const nextProfileSet = new Set(
-      nextProfiles.map(name => cleanName(name).toLowerCase()).filter(Boolean),
-    );
+    const nextProfileSet = new Set(nextProfiles.map(name => cleanName(name).toLowerCase()).filter(Boolean));
     const nextShotKeys =
       nextProfileSet.size === 0
         ? []
@@ -996,6 +1061,7 @@ export function StatisticsView({ initialContext }) {
           profiles: profileSnapshot,
           fallbackProfiles: Array.isArray(fallbackProfiles) ? fallbackProfiles : [],
           calcMode: nextCalcMode,
+          mode,
         });
       } finally {
         if (prepareRunIdRef.current === prepareRunId) {
@@ -1016,10 +1082,40 @@ export function StatisticsView({ initialContext }) {
     setDateBasisMode('auto');
   };
 
+  useEffect(() => {
+    if (!result || !runRequest?.id) return;
+    if (initializedDetailSectionRunIdRef.current === runRequest.id) return;
+
+    const hasProfileGroups = Array.isArray(result.profileGroups) && result.profileGroups.length > 0;
+    const hasPhaseStats = Array.isArray(result.phaseStats) && result.phaseStats.length > 0;
+    const preferredSection = getPreferredStatisticsDetailSection(runRequest.mode);
+    const nextSection = resolveStatisticsDetailSectionChoice({
+      candidate: preferredSection,
+      hasProfileGroupStatistics: hasProfileGroups,
+      hasPhaseStatistics: hasPhaseStats,
+    });
+
+    setStatisticsDetailSection(nextSection);
+    initializedDetailSectionRunIdRef.current = runRequest.id;
+  }, [result, runRequest]);
+
+  const hasProfileGroupStatistics = result?.profileGroups?.length > 0;
+  const hasPhaseStatistics = result?.phaseStats?.length > 0;
+  const preferredStatisticsDetailSection = getPreferredStatisticsDetailSection(runRequest?.mode);
+  const detailSectionCandidate =
+    initializedDetailSectionRunIdRef.current === runRequest?.id
+      ? statisticsDetailSection
+      : preferredStatisticsDetailSection;
+  const resolvedStatisticsDetailSection = resolveStatisticsDetailSectionChoice({
+    candidate: detailSectionCandidate,
+    hasProfileGroupStatistics,
+    hasPhaseStatistics,
+  });
+
   return (
     <div className='space-y-5'>
       <div className='bg-base-100/80 border-base-content/10 z-50 rounded-xl border shadow-lg backdrop-blur-md lg:sticky lg:top-0'>
-        <div className='p-2'>
+        <div className='px-1.5 py-1.5 sm:px-2 sm:py-2'>
           <StatisticsToolbar
             source={source}
             onSourceChange={value => {
@@ -1073,7 +1169,7 @@ export function StatisticsView({ initialContext }) {
       </div>
 
       {loading && (
-        <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-6 text-center'>
+        <div className={`${STATISTICS_PANEL_CLASS} p-6 text-center`}>
           <div className='mb-2 text-sm font-semibold opacity-70'>
             Analyzing shot {progress.current} of {progress.total}...
           </div>
@@ -1101,33 +1197,30 @@ export function StatisticsView({ initialContext }) {
         <div className='space-y-5'>
           <SummaryCards summary={result.summary} />
 
-          <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-4 shadow-sm'>
+          <div className='space-y-2'>
+            <h3 className={STATISTICS_SECTION_TITLE_CLASS}>Global metric averages</h3>
             <MetricsTable metrics={result.metrics} />
           </div>
 
           {result.trends.length > 1 && (
-            <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-4 shadow-sm'>
-              <TrendChart trends={result.trends} />
+            <div className='space-y-2'>
+              <h3 className={STATISTICS_SECTION_TITLE_CLASS}>Trends</h3>
+              <div className={`${STATISTICS_PANEL_CLASS} p-4`}>
+                <TrendChart trends={result.trends} />
+              </div>
             </div>
           )}
 
-          {result.profileGroups.length > 0 && (
-            <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-4 shadow-sm'>
-              <ProfileGroupTable profileGroups={result.profileGroups} />
-            </div>
-          )}
-
-          {result.phaseStats.length > 0 && (
-            <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-4 shadow-sm'>
-              <PhaseStatistics
-                phaseStats={result.phaseStats}
-                defaultExpanded={mode === 'profile'}
-              />
-            </div>
-          )}
+          <StatisticsDetailSectionPanel
+            hasPhaseStatistics={hasPhaseStatistics}
+            hasProfileGroupStatistics={hasProfileGroupStatistics}
+            resolvedStatisticsDetailSection={resolvedStatisticsDetailSection}
+            result={result}
+            setStatisticsDetailSection={setStatisticsDetailSection}
+          />
 
           {result.summary.totalShots === 0 && (
-            <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-8 text-center'>
+            <div className={`${STATISTICS_PANEL_CLASS} p-8 text-center`}>
               <p className='text-sm opacity-50'>No shots found for the selected filters.</p>
             </div>
           )}
@@ -1135,17 +1228,15 @@ export function StatisticsView({ initialContext }) {
       )}
 
       {!loading && !result && !error && !metadataError && metadataLoading && (
-        <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-12 text-center'>
+        <div className={`${STATISTICS_PANEL_CLASS} p-12 text-center`}>
           <span className='loading loading-spinner loading-lg text-base-content/30' />
           <p className='mt-3 text-sm opacity-50'>Loading shots and profiles...</p>
         </div>
       )}
 
       {!loading && !result && !error && !metadataError && !metadataLoading && (
-        <div className='bg-base-200/50 border-base-content/5 rounded-lg border p-8 text-center'>
-          <p className='text-sm opacity-50'>
-            Configure your filters and press Go to generate statistics.
-          </p>
+        <div className={`${STATISTICS_PANEL_CLASS} p-8 text-center`}>
+          <p className='text-sm opacity-50'>Configure your filters and press Go to generate statistics.</p>
         </div>
       )}
     </div>
