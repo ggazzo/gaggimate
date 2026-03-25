@@ -225,7 +225,7 @@ export function OTA() {
                     name='repository'
                     type='text'
                     className='input input-bordered w-full'
-                    value={formData.repository || 'jniebuhr/gaggimate'}
+                    defaultValue={formData.repository || 'jniebuhr/gaggimate'}
                     placeholder='jniebuhr/gaggimate'
                   />
                 </div>
@@ -259,12 +259,12 @@ export function OTA() {
                       name='customChannel'
                       type='text'
                       className='input input-bordered w-full'
-                      value={
+                      defaultValue={
                         formData.channel !== 'latest' && formData.channel !== 'nightly'
                           ? formData.channel
                           : ''
                       }
-                      placeholder='e.g. v2.0.0-beta'
+                      placeholder='e.g. pr-1'
                     />
                   )}
                 </div>
