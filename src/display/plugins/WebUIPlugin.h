@@ -16,7 +16,11 @@ constexpr size_t STATUS_PERIOD = 500;
 constexpr size_t DNS_PERIOD = 10;
 
 const String LOCAL_URL = "http://4.4.4.1/";
-const String RELEASE_URL = "https://github.com/jniebuhr/gaggimate/releases/";
+
+#ifndef OTA_GITHUB_REPO
+#define OTA_GITHUB_REPO "jniebuhr/gaggimate"
+#endif
+const String RELEASE_URL = "https://github.com/" OTA_GITHUB_REPO "/releases/";
 
 class ProfileManager;
 
