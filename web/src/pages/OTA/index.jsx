@@ -378,7 +378,7 @@ export function OTA() {
             >
               Update Controller
             </button>
-            <button type='button' className='btn btn-outline' onClick={downloadCoreDump}>
+            <button type='button' className='btn btn-outline' onClick={downloadSupportData}>
               Download Core Dump
             </button>
           </div>
