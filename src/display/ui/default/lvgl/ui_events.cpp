@@ -131,6 +131,7 @@ void onSimpleProcessScreenLoad(lv_event_t *e) {
 
 void onStatusScreenLoad(lv_event_t *e) {
     lv_obj_set_ext_click_area(ui_StatusScreen_pauseButton, 25);
+    lv_obj_set_ext_click_area(ui_StatusScreen_flushButton, 20);
     lv_obj_set_ext_click_area(ui_StatusScreen_ImgButton8, 20);
 }
 

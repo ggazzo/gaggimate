@@ -18,6 +18,7 @@ lv_obj_t *ui_StatusScreen_contentPanel2 = NULL;
 lv_obj_t *ui_StatusScreen_targetDuration = NULL;
 lv_obj_t *ui_StatusScreen_targetTemp = NULL;
 lv_obj_t *ui_StatusScreen_pauseButton = NULL;
+lv_obj_t *ui_StatusScreen_flushButton = NULL;
 lv_obj_t *ui_StatusScreen_Image7 = NULL;
 lv_obj_t *ui_StatusScreen_Image8 = NULL;
 lv_obj_t *ui_StatusScreen_currentDuration = NULL;
@@ -54,7 +55,14 @@ void ui_event_StatusScreen_pauseButton(lv_event_t *e) {
 
     if (event_code == LV_EVENT_CLICKED) {
         onBrewCancel(e);
-        (e);
+    }
+}
+
+void ui_event_StatusScreen_flushButton(lv_event_t *e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if (event_code == LV_EVENT_CLICKED) {
+        onFlush(e);
     }
 }
 
@@ -134,6 +142,28 @@ void ui_StatusScreen_screen_init(void) {
                                            _ui_theme_color_NiceWhite);
     ui_object_set_themeable_style_property(ui_StatusScreen_pauseButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
                                            _ui_theme_alpha_NiceWhite);
+
+    ui_StatusScreen_flushButton = lv_btn_create(ui_StatusScreen_contentPanel2);
+    lv_obj_set_width(ui_StatusScreen_flushButton, 50);
+    lv_obj_set_height(ui_StatusScreen_flushButton, 50);
+    lv_obj_set_x(ui_StatusScreen_flushButton, -50);
+    lv_obj_set_y(ui_StatusScreen_flushButton, 130);
+    lv_obj_set_align(ui_StatusScreen_flushButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_StatusScreen_flushButton, LV_OBJ_FLAG_HIDDEN); /// Initially hidden
+    lv_obj_set_style_bg_opa(ui_StatusScreen_flushButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_StatusScreen_flushButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_width(ui_StatusScreen_flushButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_all(ui_StatusScreen_flushButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    {
+        lv_obj_t *flush_img = lv_img_create(ui_StatusScreen_flushButton);
+        lv_img_set_src(flush_img, &ui_img_545340440);
+        lv_img_set_zoom(flush_img, 160); // Scale from 80x80 to ~50x50
+        lv_obj_center(flush_img);
+        ui_object_set_themeable_style_property(flush_img, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR,
+                                               _ui_theme_color_NiceWhite);
+        ui_object_set_themeable_style_property(flush_img, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_IMG_RECOLOR_OPA,
+                                               _ui_theme_alpha_NiceWhite);
+    }
 
     ui_StatusScreen_Image7 = lv_img_create(ui_StatusScreen_contentPanel2);
     lv_img_set_src(ui_StatusScreen_Image7, &ui_img_1951499226);
@@ -275,6 +305,7 @@ void ui_StatusScreen_screen_init(void) {
 
     lv_obj_add_event_cb(ui_StatusScreen_ImgButton8, ui_event_StatusScreen_ImgButton8, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_StatusScreen_pauseButton, ui_event_StatusScreen_pauseButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_StatusScreen_flushButton, ui_event_StatusScreen_flushButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_StatusScreen, ui_event_StatusScreen, LV_EVENT_ALL, NULL);
     uic_StatusScreen_dials_tempGauge = ui_comp_get_child(ui_StatusScreen_dials, UI_COMP_DIALS_TEMPGAUGE);
     uic_StatusScreen_dials_tempTarget = ui_comp_get_child(ui_StatusScreen_dials, UI_COMP_DIALS_TEMPTARGET);
@@ -302,6 +333,7 @@ void ui_StatusScreen_screen_destroy(void) {
     ui_StatusScreen_targetDuration = NULL;
     ui_StatusScreen_targetTemp = NULL;
     ui_StatusScreen_pauseButton = NULL;
+    ui_StatusScreen_flushButton = NULL;
     ui_StatusScreen_Image7 = NULL;
     ui_StatusScreen_Image8 = NULL;
     ui_StatusScreen_currentDuration = NULL;

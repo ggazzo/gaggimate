@@ -809,6 +809,11 @@ void DefaultUI::updateStatusScreen() const {
     // Brew finished adjustments
     if (process->isActive()) {
         lv_obj_add_flag(ui_StatusScreen_brewVolume, LV_OBJ_FLAG_HIDDEN);
+        // Hide flush button and center pause button during active brew
+        if (ui_StatusScreen_flushButton) {
+            lv_obj_add_flag(ui_StatusScreen_flushButton, LV_OBJ_FLAG_HIDDEN);
+        }
+        lv_obj_set_x(ui_StatusScreen_pauseButton, 0);
     } else {
         // Re-validate brewProcess pointer before accessing members
         if (brewProcess && brewProcess->target == ProcessTarget::VOLUMETRIC) {
@@ -820,6 +825,11 @@ void DefaultUI::updateStatusScreen() const {
             lv_label_set_text_fmt(ui_StatusScreen_brewVolume, "%.1lfg", brewProcess->currentVolume);
         }
         lv_imgbtn_set_src(ui_StatusScreen_pauseButton, LV_IMGBTN_STATE_RELEASED, nullptr, &ui_img_631115820, nullptr);
+        // Show flush button and reposition accept button side by side
+        if (ui_StatusScreen_flushButton) {
+            lv_obj_clear_flag(ui_StatusScreen_flushButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_set_x(ui_StatusScreen_pauseButton, 50);
+        }
     }
 }
 

@@ -17,10 +17,15 @@ constexpr size_t DNS_PERIOD = 10;
 
 const String LOCAL_URL = "http://4.4.4.1/";
 
-#ifndef OTA_GITHUB_REPO
-#define OTA_GITHUB_REPO "jniebuhr/gaggimate"
-#endif
-const String RELEASE_URL = "https://github.com/" OTA_GITHUB_REPO "/releases/";
+inline String buildReleaseUrl(const String &repository, const String &channel) {
+    String url = "https://github.com/" + repository + "/releases/";
+    if (channel == "latest") {
+        url += "latest";
+    } else {
+        url += "tag/" + channel;
+    }
+    return url;
+}
 
 class ProfileManager;
 

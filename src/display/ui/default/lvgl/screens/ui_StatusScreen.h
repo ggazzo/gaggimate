@@ -23,6 +23,8 @@ extern lv_obj_t *ui_StatusScreen_targetDuration;
 extern lv_obj_t *ui_StatusScreen_targetTemp;
 extern void ui_event_StatusScreen_pauseButton(lv_event_t *e);
 extern lv_obj_t *ui_StatusScreen_pauseButton;
+extern void ui_event_StatusScreen_flushButton(lv_event_t *e);
+extern lv_obj_t *ui_StatusScreen_flushButton;
 extern lv_obj_t *ui_StatusScreen_Image7;
 extern lv_obj_t *ui_StatusScreen_Image8;
 extern lv_obj_t *ui_StatusScreen_currentDuration;
