@@ -49,9 +49,11 @@ export function OTA() {
   useEffect(() => {
     const listenerId = apiService.on('res:ota-settings', msg => {
       setFormData(msg);
+      const official = /^v\d+\.\d+\.\d+$/.test(msg.displayVersion);
       if (
-        (msg.repository && msg.repository !== 'jniebuhr/gaggimate') ||
-        (msg.channel && msg.channel !== 'latest' && msg.channel !== 'nightly')
+        !official &&
+        ((msg.repository && msg.repository !== 'jniebuhr/gaggimate') ||
+          (msg.channel && msg.channel !== 'latest' && msg.channel !== 'nightly'))
       ) {
         setAdvanced(true);
       }
@@ -123,6 +125,7 @@ export function OTA() {
     [apiService],
   );
 
+  const isOfficialBuild = /^v\d+\.\d+\.\d+$/.test(formData.displayVersion);
   const [advanced, setAdvanced] = useState(false);
   const [rebuilding, setRebuilding] = useState(false);
   const [rebuilt, setRebuilt] = useState(false);
@@ -190,17 +193,19 @@ export function OTA() {
               </div>
             )}
 
-            <div className='form-control'>
-              <label className='label cursor-pointer justify-start gap-2'>
-                <input
-                  type='checkbox'
-                  className='checkbox checkbox-sm'
-                  checked={advanced}
-                  onChange={e => setAdvanced(e.target.checked)}
-                />
-                <span className='label-text text-sm font-medium'>Advanced OTA Settings</span>
-              </label>
-            </div>
+            {!isOfficialBuild && (
+              <div className='form-control'>
+                <label className='label cursor-pointer justify-start gap-2'>
+                  <input
+                    type='checkbox'
+                    className='checkbox checkbox-sm'
+                    checked={advanced}
+                    onChange={e => setAdvanced(e.target.checked)}
+                  />
+                  <span className='label-text text-sm font-medium'>Advanced OTA Settings</span>
+                </label>
+              </div>
+            )}
 
             {advanced && (
               <>
