@@ -5,6 +5,7 @@ import { ApiServiceContext } from '../../services/ApiService.js';
 import { downloadJson } from '../../utils/download.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import { machine } from '../../services/ApiService.js';
 
 const imageUrlToBase64 = async blob => {
   return new Promise((onSuccess, onError) => {
@@ -27,6 +28,7 @@ export function OTA() {
   const [formData, setFormData] = useState({});
   const [phase, setPhase] = useState(0);
   const [progress, setProgress] = useState(0);
+  const rssi = machine.value.status.rssi;
 
   const downloadSupportData = useCallback(async () => {
     const settingsResponse = await fetch(`/api/settings`);
@@ -47,6 +49,14 @@ export function OTA() {
   useEffect(() => {
     const listenerId = apiService.on('res:ota-settings', msg => {
       setFormData(msg);
+      const official = /^v\d+\.\d+\.\d+$/.test(msg.displayVersion);
+      if (
+        !official &&
+        ((msg.repository && msg.repository !== 'jniebuhr/gaggimate') ||
+          (msg.channel && msg.channel !== 'latest' && msg.channel !== 'nightly'))
+      ) {
+        setAdvanced(true);
+      }
       setIsLoading(false);
       setSubmitting(false);
     });
@@ -63,15 +73,15 @@ export function OTA() {
       apiService.off('evt:ota-progress', listenerId);
     };
   }, [apiService]);
-  
+
   useEffect(() => {
     const listenerId = apiService.on('evt:history-rebuild-progress', msg => {
       setRebuildProgress({
         total: msg.total || 0,
         current: msg.current || 0,
-        status: msg.status || ''
+        status: msg.status || '',
       });
-      
+
       if (msg.status === 'completed' || msg.status === 'error') {
         setRebuilding(false);
         setRebuilt(msg.status === 'completed');
@@ -88,17 +98,29 @@ export function OTA() {
   }, [apiService]);
 
   const formRef = useRef();
+  const isOfficialBuild = /^v\d+\.\d+\.\d+$/.test(formData.displayVersion);
+  const [advanced, setAdvanced] = useState(false);
+  const [rebuilding, setRebuilding] = useState(false);
+  const [rebuilt, setRebuilt] = useState(false);
+  const [rebuildProgress, setRebuildProgress] = useState({ total: 0, current: 0, status: '' });
 
   const onSubmit = useCallback(
     async e => {
       e.preventDefault();
       setSubmitting(true);
       const form = formRef.current;
-      const formData = new FormData(form);
-      apiService.send({ tp: 'req:ota-settings', update: true, channel: formData.get('channel') });
-      setSubmitting(true);
+      const fd = new FormData(form);
+      const msg = { tp: 'req:ota-settings', update: true };
+      if (advanced) {
+        msg.repository = fd.get('repository');
+        const channelSelect = fd.get('channelSelect');
+        msg.channel = channelSelect === 'custom' ? fd.get('customChannel') : channelSelect;
+      } else {
+        msg.channel = fd.get('channel');
+      }
+      apiService.send(msg);
     },
-    [setFormData, formRef],
+    [apiService, advanced, formRef],
   );
 
   const onUpdate = useCallback(
@@ -107,10 +129,6 @@ export function OTA() {
     },
     [apiService],
   );
-
-  const [rebuilding, setRebuilding] = useState(false);
-  const [rebuilt, setRebuilt] = useState(false);
-  const [rebuildProgress, setRebuildProgress] = useState({ total: 0, current: 0, status: '' });
   const onHistoryRebuild = useCallback(async () => {
     setRebuilt(false);
     setRebuilding(true);
@@ -158,30 +176,109 @@ export function OTA() {
       <form key='ota' method='post' action='/api/ota' ref={formRef} onSubmit={onSubmit}>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-12'>
           <Card sm={12} title='System Information'>
-            <div className='flex flex-col space-y-4'>
-              <label htmlFor='channel' className='text-sm font-medium'>
-                Update Channel
-              </label>
-              <select id='channel' name='channel' className='select select-bordered w-full'>
-                <option value='latest' selected={formData.channel === 'latest'}>
-                  Stable
-                </option>
-                <option value='nightly' selected={formData.channel === 'nightly'}>
-                  Nightly
-                </option>
-              </select>
-            </div>
-
-            <div className='flex flex-col space-y-4'>
-              <label className='text-sm font-medium'>Hardware</label>
-              <div className='input input-bordered bg-base-200 cursor-default break-words whitespace-normal'>
-                {formData.hardware}
+            {!advanced && (
+              <div className='flex flex-col space-y-4'>
+                <label htmlFor='channel' className='text-sm font-medium'>
+                  Update Channel
+                </label>
+                <select id='channel' name='channel' className='select select-bordered w-full'>
+                  <option value='latest' selected={formData.channel === 'latest'}>
+                    Stable
+                  </option>
+                  <option value='nightly' selected={formData.channel === 'nightly'}>
+                    Nightly
+                  </option>
+                </select>
               </div>
+            )}
+
+            {!isOfficialBuild && (
+              <div className='form-control'>
+                <label className='label cursor-pointer justify-start gap-2'>
+                  <input
+                    type='checkbox'
+                    className='checkbox checkbox-sm'
+                    checked={advanced}
+                    onChange={e => setAdvanced(e.target.checked)}
+                  />
+                  <span className='label-text text-sm font-medium'>Advanced OTA Settings</span>
+                </label>
+              </div>
+            )}
+
+            {advanced && (
+              <>
+                <div className='alert alert-error'>
+                  <span>
+                    Using custom repositories or release channels may install untrusted or
+                    incompatible firmware. This can brick your device or cause unexpected behavior.
+                    Only use sources you trust. Proceed at your own risk.
+                  </span>
+                </div>
+
+                <div className='flex flex-col space-y-4'>
+                  <label htmlFor='repository' className='text-sm font-medium'>
+                    Repository (org/repo)
+                  </label>
+                  <input
+                    id='repository'
+                    name='repository'
+                    type='text'
+                    className='input input-bordered w-full'
+                    defaultValue={formData.repository || 'jniebuhr/gaggimate'}
+                    placeholder='jniebuhr/gaggimate'
+                  />
+                </div>
+
+                <div className='flex flex-col space-y-4'>
+                  <label htmlFor='channelSelect' className='text-sm font-medium'>
+                    Update Channel
+                  </label>
+                  <select
+                    id='channelSelect'
+                    name='channelSelect'
+                    className='select select-bordered w-full'
+                    defaultValue={
+                      formData.channel === 'latest' || formData.channel === 'nightly'
+                        ? formData.channel
+                        : 'custom'
+                    }
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, _channelSelect: e.target.value }))
+                    }
+                  >
+                    <option value='latest'>Stable</option>
+                    <option value='nightly'>Nightly</option>
+                    <option value='custom'>Custom</option>
+                  </select>
+                  {(formData._channelSelect === 'custom' ||
+                    (!formData._channelSelect &&
+                      formData.channel !== 'latest' &&
+                      formData.channel !== 'nightly')) && (
+                    <input
+                      name='customChannel'
+                      type='text'
+                      className='input input-bordered w-full'
+                      defaultValue={
+                        formData.channel !== 'latest' && formData.channel !== 'nightly'
+                          ? formData.channel
+                          : ''
+                      }
+                      placeholder='e.g. pr-1'
+                    />
+                  )}
+                </div>
+              </>
+            )}
+
+            <div className='flex flex-col space-y-4'>
+              <label className='mb-2 block text-sm font-medium'>Hardware</label>
+              <span className='font-light'>{formData.hardware}</span>
             </div>
 
             <div className='flex flex-col space-y-4'>
-              <label className='text-sm font-medium'>Controller Version</label>
-              <div className='input input-bordered bg-base-200 cursor-default break-words whitespace-normal'>
+              <label className='mb-2 block text-sm font-medium'>Controller Version</label>
+              <div className='flex flex-row gap-2 font-light'>
                 <span className='break-all'>{formData.controllerVersion}</span>
                 {formData.controllerUpdateAvailable && (
                   <span className='text-primary font-bold break-all'>
@@ -192,8 +289,8 @@ export function OTA() {
             </div>
 
             <div className='flex flex-col space-y-4'>
-              <label className='text-sm font-medium'>Display Version</label>
-              <div className='input input-bordered bg-base-200 cursor-default break-words whitespace-normal'>
+              <label className='mb-2 block text-sm font-medium'>Display Version</label>
+              <div className='flex flex-row gap-2 font-light'>
                 <span className='break-all'>{formData.displayVersion}</span>
                 {formData.displayUpdateAvailable && (
                   <span className='text-primary font-bold break-all'>
@@ -203,9 +300,19 @@ export function OTA() {
               </div>
             </div>
 
+            <div className='flex flex-col space-y-4'>
+              <label className='mb-2 block text-sm font-medium'>Controller Signal Strength</label>
+              <span className='font-light'>
+                {rssi}dB{' '}
+                <span
+                  className={`indicator-item status ml-2 ${rssi < -90 ? 'status-error' : rssi < -80 ? 'status-warning' : 'status-success'}`}
+                ></span>
+              </span>
+            </div>
+
             {formData.spiffsTotal !== undefined && (
               <div className='flex flex-col space-y-2'>
-                <label className='text-sm font-medium'>Storage (SPIFFS)</label>
+                <label className='mb-2 block text-sm font-medium'>Storage (SPIFFS)</label>
                 <div className='flex flex-col gap-1'>
                   <div className='bg-base-300 h-3 w-full overflow-hidden rounded'>
                     <div
@@ -272,51 +379,29 @@ export function OTA() {
               Update Controller
             </button>
             <button type='button' className='btn btn-outline' onClick={downloadSupportData}>
-              Download Support Data
-            </button>
-            <button
-              type='button'
-              className='btn btn-outline'
-              onClick={onHistoryRebuild}
-              disabled={rebuilding}
-            >
-              Rebuild Shot History
-              {rebuilding && (
-                <>
-                  <Spinner size={4} className='ml-2' />
-                  {rebuildProgress.total > 0 && (
-                    <span className='ml-2 text-xs'>
-                      {rebuildProgress.current}/{rebuildProgress.total}
-                    </span>
-                  )}
-                </>
-              )}
-              {rebuilt && (
-                <span className='text-success ml-2'>
-                  <FontAwesomeIcon icon={faCheck}></FontAwesomeIcon>
-                </span>
-              )}
+              Download Core Dump
             </button>
           </div>
-          
+
           {rebuilding && (
             <div className='mt-3'>
-              <div className='text-sm text-base-content/70 mb-1'>
-                {rebuildProgress.status === 'starting' || rebuildProgress.status === 'scanning' || rebuildProgress.total === 0 ? (
-                  'Scanning shot history files...'
-                ) : (
-                  `Processing shot history files (${rebuildProgress.current}/${rebuildProgress.total})`
-                )}
+              <div className='text-base-content/70 mb-1 text-sm'>
+                {rebuildProgress.status === 'starting' ||
+                rebuildProgress.status === 'scanning' ||
+                rebuildProgress.total === 0
+                  ? 'Scanning shot history files...'
+                  : `Processing shot history files (${rebuildProgress.current}/${rebuildProgress.total})`}
               </div>
               <div className='bg-base-300 h-2 w-full overflow-hidden rounded'>
                 <div
                   className={`h-full transition-all duration-300 ${
                     rebuildProgress.total === 0 ? 'bg-primary animate-pulse' : 'bg-primary'
                   }`}
-                  style={{ 
-                    width: rebuildProgress.total > 0 
-                      ? `${(rebuildProgress.current / rebuildProgress.total) * 100}%`
-                      : '30%'
+                  style={{
+                    width:
+                      rebuildProgress.total > 0
+                        ? `${(rebuildProgress.current / rebuildProgress.total) * 100}%`
+                        : '30%',
                   }}
                 />
               </div>

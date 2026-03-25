@@ -37,18 +37,20 @@ jobs:
     - name: Add version
       run: |
         mkdir -p out
-        git tag -d nightly
+        git tag -d nightly 2>/dev/null || true
         git describe --tags --dirty > out/version.txt
     - name: Build Web
       run: ./scripts/build_spiffs.sh
     - name: Build controller
       run: |
+        export PLATFORMIO_BUILD_FLAGS="'-DOTA_GITHUB_REPO=\"${{ github.repository }}\"'"
         pio run -e controller
         mv .pio/build/controller/firmware.bin out/board-firmware.bin
         mv .pio/build/controller/partitions.bin out/board-partitions.bin
         mv .pio/build/controller/bootloader.bin out/board-bootloader.bin
     - name: Build display
       run: |
+        export PLATFORMIO_BUILD_FLAGS="'-DOTA_GITHUB_REPO=\"${{ github.repository }}\"'"
         pio run -e display
         mv .pio/build/display/firmware.bin out/display-firmware.bin
         mv .pio/build/display/partitions.bin out/display-partitions.bin
@@ -57,7 +59,21 @@ jobs:
       run: |
         pio run -t buildfs -e display
         cp .pio/build/display/spiffs.bin out/display-filesystem.bin
+    - name: Create PR Release
+      uses: ncipollo/release-action@bcfe5470707e8832e12347755757cec0eb3c22af
+      with:
+        tag: pr-${{ github.event.pull_request.number }}
+        name: 'PR #${{ github.event.pull_request.number }} Build'
+        prerelease: true
+        allowUpdates: true
+        body: |
+          Firmware build for PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}
+
+          To install via OTA: set channel to `pr-${{ github.event.pull_request.number }}` in Advanced OTA Settings.
+        artifacts: out/*.bin,out/version.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Deploy to GitHub Pages subdirectory
+      continue-on-error: true
       uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

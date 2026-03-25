@@ -31,7 +31,7 @@ void WebUIPlugin::setup(Controller *_controller, PluginManager *_pluginManager) 
     this->pluginManager = _pluginManager;
     this->ota = new GitHubOTA(
         BUILD_GIT_VERSION, controller->getSystemInfo().version,
-        RELEASE_URL + (controller->getSettings().getOTAChannel() == "latest" ? "latest" : "tag/nightly"),
+        buildReleaseUrl(controller->getSettings().getOTARepository(), controller->getSettings().getOTAChannel()),
         [this](uint8_t phase) {
             pluginManager->trigger("ota:update:phase", "phase", phase);
             updateOTAProgress(phase, 0);
@@ -109,6 +109,7 @@ void WebUIPlugin::loop() {
         doc["gtv"] = controller->getSettings().getTargetGrindVolume();
         doc["gt"] = controller->isVolumetricAvailable() && controller->getSettings().isVolumetricTarget() ? 1 : 0;
         doc["gact"] = controller->isGrindActive() ? 1 : 0;
+        doc["rssi"] = controller->getClientController()->getClient()->getRssi();
 
         bool bleConnected = BLEScales.isConnected();
         // Add Bluetooth scale weight information
@@ -360,9 +361,18 @@ void WebUIPlugin::handleWebSocketData(AsyncWebSocket *server, AsyncWebSocketClie
 
 void WebUIPlugin::handleOTASettings(uint32_t clientId, JsonDocument &request) {
     if (request["update"].as<bool>()) {
+        bool changed = false;
+        if (!request["repository"].isNull()) {
+            controller->getSettings().setOTARepository(request["repository"].as<String>());
+            changed = true;
+        }
         if (!request["channel"].isNull()) {
-            controller->getSettings().setOTAChannel(request["channel"].as<String>() == "latest" ? "latest" : "nightly");
-            ota->setReleaseUrl(RELEASE_URL + (controller->getSettings().getOTAChannel() == "latest" ? "latest" : "tag/nightly"));
+            controller->getSettings().setOTAChannel(request["channel"].as<String>());
+            changed = true;
+        }
+        if (changed) {
+            ota->setReleaseUrl(
+                buildReleaseUrl(controller->getSettings().getOTARepository(), controller->getSettings().getOTAChannel()));
             lastUpdateCheck = 0;
         }
     }
@@ -666,6 +676,7 @@ void WebUIPlugin::handleBLEScaleList(AsyncWebServerRequest *request) {
         JsonDocument scale;
         scale["uuid"] = device.getAddress().toString();
         scale["name"] = device.getName();
+        scale["rssi"] = device.getRSSI();
         scalesArray.add(scale);
     }
     AsyncResponseStream *response = request->beginResponseStream("application/json");
@@ -704,6 +715,7 @@ void WebUIPlugin::handleBLEScaleInfo(AsyncWebServerRequest *request) {
     doc["connected"] = BLEScales.isConnected();
     doc["name"] = BLEScales.getName();
     doc["uuid"] = BLEScales.getUUID();
+    doc["rssi"] = BLEScales.getRSSI();
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     serializeJson(doc, *response);
     request->send(response);
@@ -721,6 +733,7 @@ void WebUIPlugin::updateOTAStatus(const String &version) {
     doc["hardware"] = controller->getSystemInfo().hardware;
     doc["latestVersion"] = ota->getCurrentVersion();
     doc["channel"] = settings.getOTAChannel();
+    doc["repository"] = settings.getOTARepository();
     doc["updating"] = updating;
     // SPIFFS usage metrics
     {

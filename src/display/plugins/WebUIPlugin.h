@@ -16,7 +16,16 @@ constexpr size_t STATUS_PERIOD = 500;
 constexpr size_t DNS_PERIOD = 10;
 
 const String LOCAL_URL = "http://4.4.4.1/";
-const String RELEASE_URL = "https://github.com/jniebuhr/gaggimate/releases/";
+
+inline String buildReleaseUrl(const String &repository, const String &channel) {
+    String url = "https://github.com/" + repository + "/releases/";
+    if (channel == "latest") {
+        url += "latest";
+    } else {
+        url += "tag/" + channel;
+    }
+    return url;
+}
 
 class ProfileManager;
 

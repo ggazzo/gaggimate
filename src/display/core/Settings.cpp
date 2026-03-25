@@ -10,7 +10,7 @@ Settings::Settings() {
     targetWaterTemp = preferences.getInt("tw", 80);
     targetGrindVolume = preferences.getDouble("tgv", 18.0);
     targetGrindDuration = preferences.getInt("tgd", 25000);
-    brewDelay = preferences.getDouble("del_br", 1000.0);
+    brewDelay = preferences.getDouble("del_br", 800.0);
     grindDelay = preferences.getDouble("del_gd", 1000.0);
     delayAdjust = preferences.getBool("del_ad", true);
     temperatureOffset = preferences.getInt("to", DEFAULT_TEMPERATURE_OFFSET);
@@ -23,6 +23,7 @@ Settings::Settings() {
     homekit = preferences.getBool("hk", false);
     volumetricTarget = preferences.getBool("vt", false);
     otaChannel = preferences.getString("oc", DEFAULT_OTA_CHANNEL);
+    otaRepository = preferences.getString("or", DEFAULT_OTA_REPOSITORY);
     savedScale = preferences.getString("ssc", "");
     momentaryButtons = preferences.getBool("mb", false);
     boilerFillActive = preferences.getBool("bf_a", false);
@@ -215,6 +216,11 @@ void Settings::setVolumetricTarget(bool volumetric_target) {
 
 void Settings::setOTAChannel(const String &otaChannel) {
     this->otaChannel = otaChannel;
+    save();
+}
+
+void Settings::setOTARepository(const String &otaRepository) {
+    this->otaRepository = otaRepository;
     save();
 }
 
@@ -446,6 +452,7 @@ void Settings::doSave() {
     preferences.putBool("hk", homekit);
     preferences.putBool("vt", volumetricTarget);
     preferences.putString("oc", otaChannel);
+    preferences.putString("or", otaRepository);
     preferences.putString("ssc", savedScale);
     preferences.putBool("bf_a", boilerFillActive);
     preferences.putInt("bf_su", startupFillTime);
