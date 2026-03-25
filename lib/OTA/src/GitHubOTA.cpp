@@ -43,20 +43,24 @@ void GitHubOTA::init(NimBLEClient *client) {
 void GitHubOTA::checkForUpdates() {
     const char *TAG = "checkForUpdates";
 
+    ESP_LOGI(TAG, "Checking for updates at release_url: %s", _release_url.c_str());
+
     _latest_url = get_updated_base_url_via_redirect(_wifi_client, _release_url);
     if (_latest_url != "") {
-        ESP_LOGI(TAG, "base_url %s\n", _latest_url.c_str());
+        ESP_LOGI(TAG, "Redirect resolved to base_url: %s", _latest_url.c_str());
 
         auto last_slash = _latest_url.lastIndexOf('/', _latest_url.length() - 2);
         auto semver_str = _latest_url.substring(last_slash + 2);
         semver_str.replace("/", "");
-        ESP_LOGI(TAG, "semver_str %s\n", semver_str.c_str());
+        ESP_LOGI(TAG, "Parsed version from URL: %s", semver_str.c_str());
         _latest_version_string = semver_str;
         semver_free(&_latest_version);
         _latest_version = from_string(semver_str.c_str());
     } else {
+        ESP_LOGI(TAG, "No redirect, falling back to version.txt");
         _latest_url = _release_url + "/";
         _latest_url.replace("tag", "download");
+        ESP_LOGI(TAG, "Download base URL: %s", _latest_url.c_str());
         String version = get_updated_version_via_txt_file(_wifi_client, _latest_url);
 
         if (version.length() == 0) {
@@ -65,10 +69,16 @@ void GitHubOTA::checkForUpdates() {
         }
 
         version = version.substring(1);
+        ESP_LOGI(TAG, "Version from version.txt: %s", version.c_str());
         _latest_version_string = version;
         semver_free(&_latest_version);
         _latest_version = from_string(version.c_str());
     }
+
+    ESP_LOGI(TAG, "Current display: %s, controller: %s, latest: %s", render_to_string(_version).c_str(),
+             render_to_string(_controller_version).c_str(), _latest_version_string.c_str());
+    ESP_LOGI(TAG, "Display update available: %s, Controller update available: %s",
+             isUpdateAvailable(false) ? "yes" : "no", isUpdateAvailable(true) ? "yes" : "no");
 }
 
 String GitHubOTA::getCurrentVersion() const { return _latest_version_string; }
@@ -86,31 +96,35 @@ void GitHubOTA::update(bool controller, bool display) {
     bool updateExecuted = false;
 
     if (controller && update_required(_latest_version, _controller_version)) {
-        ESP_LOGI(TAG, "Controller update is required, running firmware update.");
+        String url = _latest_url + _controller_firmware_name;
+        ESP_LOGI(TAG, "Controller update required. Downloading: %s", url.c_str());
         this->phase = PHASE_CONTROLLER_FW;
         this->_phase_callback(PHASE_CONTROLLER_FW);
-        _controller_ota.update(_wifi_client, _latest_url + _controller_firmware_name);
-        ESP_LOGI(TAG, "Controller update successful. Restarting...\n");
+        _controller_ota.update(_wifi_client, url);
+        ESP_LOGI(TAG, "Controller update successful. Restarting...");
         updateExecuted = true;
     }
 
     if (display && update_required(_latest_version, _version)) {
-        ESP_LOGI(TAG, "Update is required, running firmware update.");
+        String fw_url = _latest_url + _firmware_name;
+        ESP_LOGI(TAG, "Display firmware update required. Downloading: %s", fw_url.c_str());
         this->phase = PHASE_DISPLAY_FW;
         this->_phase_callback(PHASE_DISPLAY_FW);
-        auto result = update_firmware(_latest_url + _firmware_name);
+        auto result = update_firmware(fw_url);
 
         if (result != HTTP_UPDATE_OK) {
-            ESP_LOGI(TAG, "Update failed: %s\n", Updater.getLastErrorString().c_str());
+            ESP_LOGE(TAG, "Display firmware update failed: %s", Updater.getLastErrorString().c_str());
             return;
         }
 
+        String fs_url = _latest_url + _filesystem_name;
+        ESP_LOGI(TAG, "Display filesystem update. Downloading: %s", fs_url.c_str());
         this->phase = PHASE_DISPLAY_FS;
         this->_phase_callback(PHASE_DISPLAY_FS);
-        result = update_filesystem(_latest_url + _filesystem_name);
+        result = update_filesystem(fs_url);
 
         if (result != HTTP_UPDATE_OK) {
-            ESP_LOGI(TAG, "Filesystem Update failed: %s\n", Updater.getLastErrorString().c_str());
+            ESP_LOGE(TAG, "Display filesystem update failed: %s", Updater.getLastErrorString().c_str());
             return;
         }
 
@@ -130,7 +144,10 @@ void GitHubOTA::update(bool controller, bool display) {
     ESP_LOGI(TAG, "No updates found\n");
 }
 
-void GitHubOTA::setReleaseUrl(const String &release_url) { this->_release_url = release_url; }
+void GitHubOTA::setReleaseUrl(const String &release_url) {
+    ESP_LOGI("GitHubOTA", "Release URL changed to: %s", release_url.c_str());
+    this->_release_url = release_url;
+}
 
 HTTPUpdateResult GitHubOTA::update_firmware(const String &url) {
     const char *TAG = "update_firmware";
