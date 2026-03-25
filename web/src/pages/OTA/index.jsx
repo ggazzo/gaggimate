@@ -49,6 +49,12 @@ export function OTA() {
   useEffect(() => {
     const listenerId = apiService.on('res:ota-settings', msg => {
       setFormData(msg);
+      if (
+        (msg.repository && msg.repository !== 'jniebuhr/gaggimate') ||
+        (msg.channel && msg.channel !== 'latest' && msg.channel !== 'nightly')
+      ) {
+        setAdvanced(true);
+      }
       setIsLoading(false);
       setSubmitting(false);
     });
@@ -96,11 +102,18 @@ export function OTA() {
       e.preventDefault();
       setSubmitting(true);
       const form = formRef.current;
-      const formData = new FormData(form);
-      apiService.send({ tp: 'req:ota-settings', update: true, channel: formData.get('channel') });
-      setSubmitting(true);
+      const fd = new FormData(form);
+      const msg = { tp: 'req:ota-settings', update: true };
+      if (advanced) {
+        msg.repository = fd.get('repository');
+        const channelSelect = fd.get('channelSelect');
+        msg.channel = channelSelect === 'custom' ? fd.get('customChannel') : channelSelect;
+      } else {
+        msg.channel = fd.get('channel');
+      }
+      apiService.send(msg);
     },
-    [setFormData, formRef],
+    [apiService, advanced, formRef],
   );
 
   const onUpdate = useCallback(
@@ -110,6 +123,7 @@ export function OTA() {
     [apiService],
   );
 
+  const [advanced, setAdvanced] = useState(false);
   const [rebuilding, setRebuilding] = useState(false);
   const [rebuilt, setRebuilt] = useState(false);
   const [rebuildProgress, setRebuildProgress] = useState({ total: 0, current: 0, status: '' });
@@ -160,19 +174,98 @@ export function OTA() {
       <form key='ota' method='post' action='/api/ota' ref={formRef} onSubmit={onSubmit}>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-12'>
           <Card sm={12} title='System Information'>
-            <div className='flex flex-col space-y-4'>
-              <label htmlFor='channel' className='mb-2 block text-sm font-medium'>
-                Update Channel
+            {!advanced && (
+              <div className='flex flex-col space-y-4'>
+                <label htmlFor='channel' className='text-sm font-medium'>
+                  Update Channel
+                </label>
+                <select id='channel' name='channel' className='select select-bordered w-full'>
+                  <option value='latest' selected={formData.channel === 'latest'}>
+                    Stable
+                  </option>
+                  <option value='nightly' selected={formData.channel === 'nightly'}>
+                    Nightly
+                  </option>
+                </select>
+              </div>
+            )}
+
+            <div className='form-control'>
+              <label className='label cursor-pointer justify-start gap-2'>
+                <input
+                  type='checkbox'
+                  className='checkbox checkbox-sm'
+                  checked={advanced}
+                  onChange={e => setAdvanced(e.target.checked)}
+                />
+                <span className='label-text text-sm font-medium'>Advanced OTA Settings</span>
               </label>
-              <select id='channel' name='channel' className='select select-bordered w-full'>
-                <option value='latest' selected={formData.channel === 'latest'}>
-                  Stable
-                </option>
-                <option value='nightly' selected={formData.channel === 'nightly'}>
-                  Nightly
-                </option>
-              </select>
             </div>
+
+            {advanced && (
+              <>
+                <div className='alert alert-error'>
+                  <span>
+                    Using custom repositories or release channels may install untrusted or
+                    incompatible firmware. This can brick your device or cause unexpected behavior.
+                    Only use sources you trust. Proceed at your own risk.
+                  </span>
+                </div>
+
+                <div className='flex flex-col space-y-4'>
+                  <label htmlFor='repository' className='text-sm font-medium'>
+                    Repository (org/repo)
+                  </label>
+                  <input
+                    id='repository'
+                    name='repository'
+                    type='text'
+                    className='input input-bordered w-full'
+                    value={formData.repository || 'jniebuhr/gaggimate'}
+                    placeholder='jniebuhr/gaggimate'
+                  />
+                </div>
+
+                <div className='flex flex-col space-y-4'>
+                  <label htmlFor='channelSelect' className='text-sm font-medium'>
+                    Update Channel
+                  </label>
+                  <select
+                    id='channelSelect'
+                    name='channelSelect'
+                    className='select select-bordered w-full'
+                    value={
+                      formData.channel === 'latest' || formData.channel === 'nightly'
+                        ? formData.channel
+                        : 'custom'
+                    }
+                    onChange={e =>
+                      setFormData(prev => ({ ...prev, _channelSelect: e.target.value }))
+                    }
+                  >
+                    <option value='latest'>Stable</option>
+                    <option value='nightly'>Nightly</option>
+                    <option value='custom'>Custom</option>
+                  </select>
+                  {(formData._channelSelect === 'custom' ||
+                    (!formData._channelSelect &&
+                      formData.channel !== 'latest' &&
+                      formData.channel !== 'nightly')) && (
+                    <input
+                      name='customChannel'
+                      type='text'
+                      className='input input-bordered w-full'
+                      value={
+                        formData.channel !== 'latest' && formData.channel !== 'nightly'
+                          ? formData.channel
+                          : ''
+                      }
+                      placeholder='e.g. v2.0.0-beta'
+                    />
+                  )}
+                </div>
+              </>
+            )}
 
             <div className='flex flex-col space-y-4'>
               <label className='mb-2 block text-sm font-medium'>Hardware</label>
@@ -307,31 +400,8 @@ export function OTA() {
             >
               Update Controller
             </button>
-            <button type='button' className='btn btn-outline' onClick={downloadSupportData}>
-              Download Support Data
-            </button>
-            <button
-              type='button'
-              className='btn btn-outline'
-              onClick={onHistoryRebuild}
-              disabled={rebuilding}
-            >
-              Rebuild Shot History
-              {rebuilding && (
-                <>
-                  <Spinner size={4} className='ml-2' />
-                  {rebuildProgress.total > 0 && (
-                    <span className='ml-2 text-xs'>
-                      {rebuildProgress.current}/{rebuildProgress.total}
-                    </span>
-                  )}
-                </>
-              )}
-              {rebuilt && (
-                <span className='text-success ml-2'>
-                  <FontAwesomeIcon icon={faCheck}></FontAwesomeIcon>
-                </span>
-              )}
+            <button type='button' className='btn btn-outline' onClick={downloadCoreDump}>
+              Download Core Dump
             </button>
           </div>
 
