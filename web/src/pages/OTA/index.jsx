@@ -98,6 +98,11 @@ export function OTA() {
   }, [apiService]);
 
   const formRef = useRef();
+  const isOfficialBuild = /^v\d+\.\d+\.\d+$/.test(formData.displayVersion);
+  const [advanced, setAdvanced] = useState(false);
+  const [rebuilding, setRebuilding] = useState(false);
+  const [rebuilt, setRebuilt] = useState(false);
+  const [rebuildProgress, setRebuildProgress] = useState({ total: 0, current: 0, status: '' });
 
   const onSubmit = useCallback(
     async e => {
@@ -124,12 +129,6 @@ export function OTA() {
     },
     [apiService],
   );
-
-  const isOfficialBuild = /^v\d+\.\d+\.\d+$/.test(formData.displayVersion);
-  const [advanced, setAdvanced] = useState(false);
-  const [rebuilding, setRebuilding] = useState(false);
-  const [rebuilt, setRebuilt] = useState(false);
-  const [rebuildProgress, setRebuildProgress] = useState({ total: 0, current: 0, status: '' });
   const onHistoryRebuild = useCallback(async () => {
     setRebuilt(false);
     setRebuilding(true);
