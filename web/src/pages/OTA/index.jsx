@@ -238,7 +238,7 @@ export function OTA() {
                     id='channelSelect'
                     name='channelSelect'
                     className='select select-bordered w-full'
-                    value={
+                    defaultValue={
                       formData.channel === 'latest' || formData.channel === 'nightly'
                         ? formData.channel
                         : 'custom'
