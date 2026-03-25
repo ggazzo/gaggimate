@@ -36,10 +36,10 @@ semver_t from_string(const string &version) {
         auto prerelease = numbers.at(2).substr(split_at + 1);
         size_t n = prerelease.length();
         prerelease_ptr = (char *)calloc(n + 1, 1);
+        if (prerelease_ptr == nullptr) {
+            return {0, 0, 0, nullptr, nullptr};
+        }
         if (n > 0) {
-            if (prerelease_ptr == nullptr) {
-                return {0, 0, 0, nullptr, nullptr};
-            }
             prerelease.copy(prerelease_ptr, n);
         }
     } else {
