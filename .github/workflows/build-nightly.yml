@@ -38,7 +38,7 @@ jobs:
           mkdir -p upload/display
           mkdir -p upload/headless
           mkdir -p upload/controller
-          git tag -d nightly
+          git tag -d nightly 2>/dev/null || true
           git describe --tags --dirty > out/version.txt
       - name: Build Web
         run: ./scripts/build_spiffs.sh
@@ -53,6 +53,7 @@ jobs:
           cp .pio/build/controller/partitions.bin upload/controller/partitions.bin
           cp .pio/build/controller/bootloader.bin upload/controller/bootloader.bin
       - uses: ./.github/actions/upload-firmware
+        if: ${{ secrets.UPDATE_SERVER_HOST != '' && secrets.UPDATE_SERVER_API_KEY != '' }}
         env:
           UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
           UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
@@ -78,6 +79,7 @@ jobs:
           cp .pio/build/display/partitions.bin upload/display/partitions.bin
           cp .pio/build/display/bootloader.bin upload/display/bootloader.bin
       - uses: ./.github/actions/upload-firmware
+        if: ${{ secrets.UPDATE_SERVER_HOST != '' && secrets.UPDATE_SERVER_API_KEY != '' }}
         env:
           UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
           UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
@@ -97,6 +99,7 @@ jobs:
           cp .pio/build/display-headless/partitions.bin upload/headless/partitions.bin
           cp .pio/build/display-headless/bootloader.bin upload/headless/bootloader.bin
       - uses: ./.github/actions/upload-firmware
+        if: ${{ secrets.UPDATE_SERVER_HOST != '' && secrets.UPDATE_SERVER_API_KEY != '' }}
         env:
           UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
           UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
@@ -125,6 +128,7 @@ jobs:
           path: release
       - name: Update Nightly Release
         uses: andelf/nightly-release@c5ed4bdb7c1da04a4fa1e40bc5e67306f682563b
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -136,6 +140,7 @@ jobs:
             release/*
       - name: Deploy to GitHub Pages subdirectory
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e
+        continue-on-error: true
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./release
