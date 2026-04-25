@@ -6,8 +6,8 @@ import LogPanel from './LogPanel.jsx';
 import ModalFooter from './ModalFooter.jsx';
 import ModalHeader from './ModalHeader.jsx';
 import ResultsPanel from './ResultsPanel.jsx';
+import { PHASE } from './constants.js';
 import { usePumpFlowCalibration } from './usePumpFlowCalibration.js';
-import { PHASE } from './utils.js';
 
 const connected = computed(() => machine.value.connected);
 

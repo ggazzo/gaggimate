@@ -1,18 +1,15 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'preact/hooks';
 import { ApiServiceContext } from '../../services/ApiService.js';
-import { CALIBRATION_PROFILE, CALIBRATION_PROFILE_ID } from './profile.js';
+import { analyze, parseCoeffs } from '../../utils/pumpFlowCalibration.js';
+import { fetchAndParseShot, fetchShotIndex, postCoefficients } from './api.js';
 import {
   MODE_BREW,
   PHASE,
   POST_MODE_SETTLE_MS,
   POST_SHOT_SETTLE_MS,
   SHOT_END_TIMEOUT_MS,
-  analyze,
-  fetchAndParseShot,
-  fetchShotIndex,
-  parseCoeffs,
-  postCoefficients,
-} from './utils.js';
+} from './constants.js';
+import { CALIBRATION_PROFILE, CALIBRATION_PROFILE_ID } from './profile.js';
 
 /**
  * usePumpFlowCalibration

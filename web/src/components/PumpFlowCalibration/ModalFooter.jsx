@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons/faSpinner';
 import { PrimaryButton, SecondaryButton } from './Buttons.jsx';
-import { PHASE } from './utils.js';
+import { PHASE } from './constants.js';
 
 export default function ModalFooter({
   phase,
