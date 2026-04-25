@@ -6,7 +6,7 @@ export default function ModalHeader({ busy, onClose }) {
         <button
           type='button'
           onClick={onClose}
-          className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+          className='btn btn-ghost btn-sm btn-circle'
           aria-label='Close'
         >
           ✕

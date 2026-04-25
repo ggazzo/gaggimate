@@ -13,7 +13,7 @@ export default function ModalFooter({
   onApply,
 }) {
   return (
-    <div className='mt-5 flex justify-end space-x-3'>
+    <div className='mt-5 flex justify-end gap-3'>
       {phase === PHASE.IDLE && (
         <>
           <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
@@ -27,11 +27,9 @@ export default function ModalFooter({
         </>
       )}
       {(phase === PHASE.RUNNING || phase === PHASE.ANALYZING) && (
-        <PrimaryButton disabled className='opacity-60'>
+        <PrimaryButton disabled>
           <FontAwesomeIcon icon={faSpinner} spin />
-          <span className='ml-2'>
-            {phase === PHASE.RUNNING ? 'Running shot...' : 'Analyzing...'}
-          </span>
+          {phase === PHASE.RUNNING ? 'Running shot...' : 'Analyzing...'}
         </PrimaryButton>
       )}
       {phase === PHASE.DONE && !saved && (
@@ -39,7 +37,7 @@ export default function ModalFooter({
           <SecondaryButton onClick={onClose}>Discard</SecondaryButton>
           <PrimaryButton onClick={onApply} disabled={saving}>
             {saving && <FontAwesomeIcon icon={faSpinner} spin />}
-            <span className={saving ? 'ml-2' : ''}>{saving ? 'Saving...' : 'Save to machine'}</span>
+            {saving ? 'Saving...' : 'Save to machine'}
           </PrimaryButton>
         </>
       )}
