@@ -26,6 +26,11 @@ export function analyze(samples, targetPressure) {
   }
   const actualFlow = volume / time;
   const estimatedFlow = pumped / time;
+  if (!Number.isFinite(actualFlow) || !(estimatedFlow > 0)) {
+    throw new Error(
+      `Invalid flow data for tp=${targetPressure} bar (estimatedFlow=${estimatedFlow}, actualFlow=${actualFlow}). The shot may not have produced any measurable output.`,
+    );
+  }
   return { volume, time, actualFlow, estimatedFlow, factor: actualFlow / estimatedFlow };
 }
 

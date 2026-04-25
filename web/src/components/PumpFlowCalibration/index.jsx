@@ -16,11 +16,15 @@ export default function PumpFlowCalibrationModal({ isOpen, onClose, currentCoeff
     { currentCoeffs, onApplied },
   );
 
+  // Lock dismissal during the actual run AND while a save POST is in flight —
+  // otherwise the user can close the modal mid-save and lose the success/failure
+  // log + the parent-form sync.
+  const closeLocked = busy || saving;
   const handleClose = useCallback(() => {
-    if (busy) return;
+    if (closeLocked) return;
     reset();
     onClose();
-  }, [busy, reset, onClose]);
+  }, [closeLocked, reset, onClose]);
 
   if (!isOpen) return null;
 
@@ -28,7 +32,7 @@ export default function PumpFlowCalibrationModal({ isOpen, onClose, currentCoeff
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
       <div className='bg-base-100 text-base-content max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg shadow-xl'>
         <div className='p-6'>
-          <ModalHeader busy={busy} onClose={handleClose} />
+          <ModalHeader busy={closeLocked} onClose={handleClose} />
 
           {phase === PHASE.IDLE && <IdleSection currentCoeffs={currentCoeffs} />}
 

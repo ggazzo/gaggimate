@@ -16,16 +16,21 @@ export async function fetchShotIndex() {
   return parseBinaryIndex(buf).entries.filter(e => !(e.flags & SHOT_FLAG_DELETED));
 }
 
-// Retries until the firmware has flushed the .slog header to flash.
+// Retries until the firmware has flushed the .slog header to flash. The
+// firmware can return 404 while the file is still being created — treat that
+// (and a too-short response body) as "not ready yet" and keep polling.
 async function fetchShotReady(id, onWait) {
   const padded = String(id).padStart(6, '0');
   for (let attempt = 1; attempt <= SLOG_FETCH_RETRIES; attempt++) {
     const r = await fetch(`/api/history/${padded}.slog`, { cache: 'no-store' });
-    if (!r.ok) throw new Error(`GET slog ${r.status}`);
-    const buf = await r.arrayBuffer();
-    if (buf.byteLength >= SLOG_HEADER_MIN) return buf;
+    if (r.ok) {
+      const buf = await r.arrayBuffer();
+      if (buf.byteLength >= SLOG_HEADER_MIN) return buf;
+    } else if (r.status !== 404) {
+      throw new Error(`GET slog ${r.status}`);
+    }
     if (onWait && (attempt === 1 || attempt % 3 === 0)) {
-      onWait(`slog still empty, waiting for flush... (${attempt})`);
+      onWait(`slog not ready, waiting for flush... (${attempt})`);
     }
     if (attempt === SLOG_FETCH_RETRIES) break;
     await new Promise(res => setTimeout(res, SLOG_FETCH_DELAY_MS));

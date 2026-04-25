@@ -100,6 +100,10 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
     setPhase(PHASE.RUNNING);
 
     try {
+      // Validate the existing coefficients first so a malformed value can't
+      // waste a full calibration shot (water + scale + portafilter).
+      const [c1, c9] = parseCoeffs(currentCoeffs);
+
       pushLog('Saving calibration profile...');
       await apiService.request({ tp: 'req:profiles:save', profile: CALIBRATION_PROFILE });
 
@@ -115,8 +119,11 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
       const preIds = new Set(before.map(e => e.id));
 
       pushLog('Starting shot — adjust the steam valve to reach 1 bar, then 9 bar.', 'ok');
+      // Subscribe to evt:status BEFORE activating so a fast a:0→1→0 transition
+      // (or a status arriving in the same tick) can't slip past the listener.
+      const shotEnd = waitForShotEnd();
       apiService.send({ tp: 'req:process:activate' });
-      await waitForShotEnd();
+      await shotEnd;
 
       pushLog('Shot finished. Fetching history...', 'ok');
       await new Promise(r => setTimeout(r, POST_SHOT_SETTLE_MS));
@@ -135,7 +142,6 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
 
       const oneBar = analyze(shot.samples, 1);
       const nineBar = analyze(shot.samples, 9);
-      const [c1, c9] = parseCoeffs(currentCoeffs);
       const newCoeffs = `${(c1 * oneBar.factor).toFixed(3)},${(c9 * nineBar.factor).toFixed(3)}`;
       setResults({ oneBar, nineBar, newCoeffs });
 
