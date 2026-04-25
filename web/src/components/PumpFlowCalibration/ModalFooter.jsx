@@ -17,7 +17,11 @@ export default function ModalFooter({
       {phase === PHASE.IDLE && (
         <>
           <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
-          <PrimaryButton onClick={onStart} disabled={!connected}>
+          <PrimaryButton
+            onClick={onStart}
+            disabled={!connected}
+            title={!connected ? 'Not connected to the machine' : undefined}
+          >
             Start calibration
           </PrimaryButton>
         </>

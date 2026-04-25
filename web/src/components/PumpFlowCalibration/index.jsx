@@ -30,9 +30,7 @@ export default function PumpFlowCalibrationModal({ isOpen, onClose, currentCoeff
         <div className='p-6'>
           <ModalHeader busy={busy} onClose={handleClose} />
 
-          {phase === PHASE.IDLE && (
-            <IdleSection currentCoeffs={currentCoeffs} connected={connected.value} />
-          )}
+          {phase === PHASE.IDLE && <IdleSection currentCoeffs={currentCoeffs} />}
 
           {logs.length > 0 && <LogPanel logs={logs} />}
 
