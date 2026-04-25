@@ -1,63 +1,18 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'preact/hooks';
-import { ApiServiceContext } from '../services/ApiService.js';
-import { parseBinaryShot } from '../pages/ShotHistory/parseBinaryShot.js';
-import { parseBinaryIndex } from '../pages/ShotHistory/parseBinaryIndex.js';
+import { ApiServiceContext } from '../../services/ApiService.js';
+import { CALIBRATION_PROFILE, CALIBRATION_PROFILE_ID } from './profile.js';
 import {
-  CALIBRATION_PROFILE,
-  CALIBRATION_PROFILE_ID,
+  MODE_BREW,
+  PHASE,
+  POST_MODE_SETTLE_MS,
+  POST_SHOT_SETTLE_MS,
+  SHOT_END_TIMEOUT_MS,
   analyze,
-} from '../utils/pumpFlowCalibration.js';
-
-const SHOT_FLAG_DELETED = 0x02;
-const SLOG_HEADER_MIN = 128; // v4 header size; firmware writes header on flush.
-const MODE_BREW = 1;
-const SHOT_END_TIMEOUT_MS = 5 * 60 * 1000;
-const SLOG_FETCH_RETRIES = 20;
-const SLOG_FETCH_DELAY_MS = 1000;
-const POST_MODE_SETTLE_MS = 1500;
-const POST_SHOT_SETTLE_MS = 1500;
-
-export const PHASE = Object.freeze({
-  IDLE: 'idle',
-  RUNNING: 'running',
-  ANALYZING: 'analyzing',
-  DONE: 'done',
-  ERROR: 'error',
-});
-
-async function fetchShotIndex() {
-  const r = await fetch('/api/history/index.bin', { cache: 'no-store' });
-  if (r.status === 404) return [];
-  if (!r.ok) throw new Error(`GET index.bin ${r.status}`);
-  const buf = await r.arrayBuffer();
-  return parseBinaryIndex(buf).entries.filter(e => !(e.flags & SHOT_FLAG_DELETED));
-}
-
-async function fetchShotReady(id, onWait) {
-  const padded = String(id).padStart(6, '0');
-  for (let attempt = 1; attempt <= SLOG_FETCH_RETRIES; attempt++) {
-    const r = await fetch(`/api/history/${padded}.slog`, { cache: 'no-store' });
-    if (!r.ok) throw new Error(`GET slog ${r.status}`);
-    const buf = await r.arrayBuffer();
-    if (buf.byteLength >= SLOG_HEADER_MIN) return buf;
-    if (onWait && (attempt === 1 || attempt % 3 === 0)) {
-      onWait(`slog still empty, waiting for flush... (${attempt})`);
-    }
-    if (attempt === SLOG_FETCH_RETRIES) break;
-    await new Promise(res => setTimeout(res, SLOG_FETCH_DELAY_MS));
-  }
-  throw new Error(
-    `Shot file remained empty after ${(SLOG_FETCH_RETRIES * SLOG_FETCH_DELAY_MS) / 1000}s`,
-  );
-}
-
-function parseCoeffs(raw) {
-  const [c1, c9] = (raw || '').split(',').map(parseFloat);
-  if (!Number.isFinite(c1) || !Number.isFinite(c9)) {
-    throw new Error(`Current coefficients are not numeric: "${raw}"`);
-  }
-  return [c1, c9];
-}
+  fetchAndParseShot,
+  fetchShotIndex,
+  parseCoeffs,
+  postCoefficients,
+} from './utils.js';
 
 /**
  * usePumpFlowCalibration
@@ -178,8 +133,7 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
       pushLog(`Downloading shot #${shotId}`);
       setPhase(PHASE.ANALYZING);
 
-      const buf = await fetchShotReady(shotId, msg => pushLog(msg, 'warn'));
-      const shot = parseBinaryShot(buf, String(shotId));
+      const shot = await fetchAndParseShot(shotId, msg => pushLog(msg, 'warn'));
       pushLog(`Parsed ${shot.samples.length} samples (v${shot.version}).`);
 
       const oneBar = analyze(shot.samples, 1);
@@ -201,13 +155,7 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
     if (!results) return;
     setSaving(true);
     try {
-      const body = new URLSearchParams({ pumpModelCoeffs: results.newCoeffs }).toString();
-      const r = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      });
-      if (!r.ok) throw new Error(`POST /api/settings ${r.status}`);
+      await postCoefficients(results.newCoeffs);
       pushLog(`Coefficients saved to machine: ${results.newCoeffs}`, 'ok');
       setSaved(true);
       onApplied?.(results.newCoeffs);

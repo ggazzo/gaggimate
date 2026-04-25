@@ -5,7 +5,7 @@ import { computed } from '@preact/signals';
 import { useQuery } from 'preact-fetching';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import Card from '../../components/Card.jsx';
-import PumpFlowCalibrationModal from '../../components/PumpFlowCalibrationModal.jsx';
+import PumpFlowCalibrationModal from '../../components/PumpFlowCalibration/index.jsx';
 import { Spinner } from '../../components/Spinner.jsx';
 import { timezones } from '../../config/zones.js';
 import { machine } from '../../services/ApiService.js';
