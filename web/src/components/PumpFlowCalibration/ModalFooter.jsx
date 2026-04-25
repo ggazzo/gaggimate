@@ -20,7 +20,7 @@ export default function ModalFooter({
           <PrimaryButton
             onClick={onStart}
             disabled={!connected}
-            title={!connected ? 'Not connected to the machine' : undefined}
+            title={connected ? undefined : 'Not connected to the machine'}
           >
             Start calibration
           </PrimaryButton>

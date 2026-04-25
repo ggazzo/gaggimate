@@ -76,7 +76,7 @@ export function usePumpFlowCalibration({ currentCoeffs, onApplied }) {
           reject(new Error('Timeout waiting for shot to finish (5min).'));
         }, SHOT_END_TIMEOUT_MS);
         statusListenerRef.current = apiService.on('evt:status', m => {
-          const active = m.process && m.process.a === 1;
+          const active = m.process?.a === 1;
           if (active) sawActive = true;
           if (sawActive && !active) {
             clearTimeout(safetyId);

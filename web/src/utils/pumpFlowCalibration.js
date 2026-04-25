@@ -30,9 +30,9 @@ export function analyze(samples, targetPressure) {
 }
 
 export function parseCoeffs(raw) {
-  const [c1, c9] = (raw || '').split(',').map(parseFloat);
+  const [c1, c9] = (raw || '').split(',').map(Number.parseFloat);
   if (!Number.isFinite(c1) || !Number.isFinite(c9)) {
-    throw new Error(`Current coefficients are not numeric: "${raw}"`);
+    throw new TypeError(`Current coefficients are not numeric: "${raw}"`);
   }
   return [c1, c9];
 }
